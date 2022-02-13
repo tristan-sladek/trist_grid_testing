@@ -1,0 +1,13 @@
+{
+  "Title": "Trist Grid Testing",
+  "Type": "game",
+  "Org": "local",
+  "Ident": "trist_grid_testing",
+  "Schema": 1,
+  "HasAssets": true,
+  "AssetsPath": "",
+  "ResourcePaths": null,
+  "HasCode": true,
+  "CodePath": "/code/",
+  "RootNamespace": "Sandbox"
+}
