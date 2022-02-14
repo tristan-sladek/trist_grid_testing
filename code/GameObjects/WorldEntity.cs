@@ -109,10 +109,22 @@ public partial class WorldEntity : ModelEntity
 			{
 				b[x, y] = 0;
 			}
-		for(int x = 0; x < 15; x++)
+		
+		for(int x = 1; x < 15; x++)
 		{
-			b[radius + x - 7, radius + 4] = (short) x;
+			b[radius + x - 8, radius + 6] = (short) x;
+			b[radius + x - 8, radius - 7] = (short) (15 - x);
 		}
+		for ( int y = 2; y < 14; y++ )
+		{
+			b[radius + 6, radius + y - 8] = (short)y;
+			b[radius - 7, radius + y - 8] = (short)(15 - y);
+		}
+		for (int y = 0; y < 12; y++ )
+			for ( int x = 0; x < 12; x++ )
+			{
+				b[radius + x - 6, radius + y - 6] = 14;
+			}
 		// Load Heightmap
 		for ( int y = 0; y < maxR; y++ )
 			for ( int x = 0; x < maxR; x++ )

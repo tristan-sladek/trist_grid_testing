@@ -87,10 +87,11 @@ public partial class Pawn : ModelEntity
 				var tr = gridPlane.Trace( Input.Cursor );
 				if ( tr == null ) return;
 				var hit = tr.Value.SnapToGrid( GS );
-				hit.z += 2;				
+				hit.z = WorldEntity.GetHeightFromWorld( hit.x, hit.y ) * WorldEntity.GRID_SCALE;
+				hit.z += 2;
 				DebugOverlay.Box( hit - half, hit + half, Color.Yellow, 0, false );
+				DebugOverlay.Box( hit.WithZ(2) - half, hit.WithZ( 2 ) + half, Color.Yellow, 0, false );
 			}
-
 			if ( WishPos != Position.WithZ(0) / GS )
 			{
 				var WishToWorld = WishPos * GS;
