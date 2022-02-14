@@ -4,9 +4,9 @@ using System.Collections.Generic;
 public partial class WorldEntity : ModelEntity
 {
 	public const float GRID_SCALE = 32f;
-	public const int radius = 16;
-	public const int maxR = radius * 2 + 1;
-	[Net] public IList<float> heightMap { get; set; } = new List<float>();
+	public const int radius = 64;
+	public int maxR { get { return radius * 2 + 1; }  }
+	[Net] public IList<short> heightMap { get; set; } = new List<short>();
 	public override void Spawn()
 	{
 		//CreateBoolList();
@@ -75,8 +75,9 @@ public partial class WorldEntity : ModelEntity
 	}
 	public float GetHeight(int x, int y)
 	{
-		if(InBounds( x ) && InBounds( y ) )
-			return heightMap[x + y * maxR];
+		int index = x + y * maxR;
+		if ( index < heightMap.Count - 1  && InBounds( x ) && InBounds( y ) )
+			return (float) (heightMap[index]) / 2;
 		return 0;
 	}
 	public float GetHeightFromWorld(float x, float y)
@@ -87,7 +88,7 @@ public partial class WorldEntity : ModelEntity
 	}
 	private void CreateHeightMap()
 	{
-		var b = new float[maxR, maxR];
+		var b = new short[maxR, maxR];
 
 		for ( int x = 0; x < maxR; x++ )
 			for ( int y = 0; y < maxR; y++ )
@@ -95,11 +96,18 @@ public partial class WorldEntity : ModelEntity
 					b[x, y] = 4;
 		for ( int i = 0; i < radius * radius; i++ )
 		{
-			float f = Rand.Int( 1, 4 );
-			b[Rand.Int( 1, radius * 2 - 1 ), Rand.Int( 1, radius * 2 - 1 )] = f /2;
+			short f = (short) Rand.Int( 1, 4 );
+			b[Rand.Int( 1, radius * 2 - 1 ), Rand.Int( 1, radius * 2 - 1 )] = f;
 		}
-			
-		b[0, 0] = 0;
+
+		var cSize = 14;
+		for(int x = radius - cSize; x < radius + cSize; x++ )
+			for ( int y = radius - cSize; y < radius + cSize; y++ )
+			{
+				b[x, y] = 0;
+			}
+
+
 
 		for ( int y = 0; y < maxR; y++ )
 			for ( int x = 0; x < maxR; x++ )
