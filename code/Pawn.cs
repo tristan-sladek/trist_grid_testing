@@ -33,17 +33,13 @@ public partial class Pawn : ModelEntity
 			int y = (int) hit.y + WorldEntity.radius;
 			
 			//Log.Info( "x:" + x + " y:" + y + "| Can Walk: " + WorldEntity.canWalk( x, y ) +" | Relative to Center x:" + (int)hit.x + " y:" + (int)hit.y );
-			if ( WorldEntity.CanWalk( x, y ) )
-			{
-				WishPos = hit;
-				//Moving = false;
-			}
-				
+			if( WorldEntity.InBounds(x) && WorldEntity.InBounds(y) ) WishPos = hit;
 		}
 
 		if ( !IsServer ) return;
 		if ( Moving )
 		{
+			Position = Position.WithZ( 0 );
 			if ( Position.Distance( CurDestPos ) < 0.1 * WorldEntity.GRID_SCALE )
 			{
 				Position = CurDestPos;
@@ -52,7 +48,7 @@ public partial class Pawn : ModelEntity
 			else
 			{
 				Position = Position.LerpTo( CurDestPos, Time.Delta * 10 );
-			}
+			}			
 		}
 		else
 		{
@@ -64,17 +60,18 @@ public partial class Pawn : ModelEntity
 				Moving = true;
 			}
 		}
-
-
+		//Log.Info( Moving + " " + Position + " " + CurDestPos );
+		Position = Position.WithZ( WorldEntity.GetHeightFromWorld( Position.x, Position.y ) * WorldEntity.GRID_SCALE );
 		base.Simulate( cl );
 	}
 	private void PathfindToWish(Vector3 PosOnGrid)
 	{
+		PosOnGrid = PosOnGrid.WithZ( 0 );
 		var p = new Pathfind( WorldEntity ).FromPosition( PosOnGrid ).ToPosition( WishPos ).Path(63);
 		
 		if(!p.CanPathfind) { WishPos = PosOnGrid; return; }
 
-		CurDestPos = (p.NextPos + PosOnGrid).SnapToGrid(1) * WorldEntity.GRID_SCALE;		
+		CurDestPos = (p.NextPos + PosOnGrid).SnapToGrid( 1 ) * WorldEntity.GRID_SCALE;
 	}
 	public override void FrameSimulate( Client cl )
 	{
@@ -82,7 +79,7 @@ public partial class Pawn : ModelEntity
 		if ( WorldEntity.IsValid() )
 		{
 			var GS = WorldEntity.GRID_SCALE;
-			var gridPlane = new Plane( Position, Vector3.Up );
+			var gridPlane = new Plane( Position.WithZ( 0 ), Vector3.Up );
 			var half = new Vector3( GS / 2, GS / 2, 0 );
 
 			if ( (Local.Hud as HUD).MouseEnabled )
@@ -90,14 +87,15 @@ public partial class Pawn : ModelEntity
 				var tr = gridPlane.Trace( Input.Cursor );
 				if ( tr == null ) return;
 				var hit = tr.Value.SnapToGrid( GS );
-				hit.z = 2;				
+				hit.z += 2;				
 				DebugOverlay.Box( hit - half, hit + half, Color.Yellow, 0, false );
 			}
 
-			if ( WishPos != Position / GS )
+			if ( WishPos != Position.WithZ(0) / GS )
 			{
 				var WishToWorld = WishPos * GS;
-				WishToWorld.z = 2;
+				WishToWorld.z = WorldEntity.GetHeightFromWorld( WishToWorld.x, WishToWorld.y ) * WorldEntity.GRID_SCALE;
+				WishToWorld.z += 2;
 				DebugOverlay.Box( WishToWorld - half, WishToWorld + half, Color.Red, 0, true );
 			}
 		}

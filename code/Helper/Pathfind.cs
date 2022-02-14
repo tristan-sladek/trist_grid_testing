@@ -51,11 +51,11 @@ public partial class Pathfind
 		for ( int x = 0; x < MaxDepth; x++ )
 			for ( int y = 0; y < MaxDepth; y++ )
 				localPathList[x, y] = -1; //default to unchecked;
-
 		var localStart = MapToLocal( Start );
 		var localEnd = MapToLocal( End );
 		// Log.Info( "MAP: " + Start + " | " + End + " : LOCAL: " + localStart + " | " + localEnd );
-
+		if ( localStart == localEnd ) return this; //Don't even try to pathfind to self
+		
 		var localDist = (localEnd - localStart); 
 		if ( Math.Abs(localDist.x) > Depth || Math.Abs( localDist.y ) > Depth ) //distance in square
 			return this; //quick cancel on distance beyond reach
@@ -161,7 +161,7 @@ public partial class Pathfind
 			var v = localPathList[x , y]; //Current Distance from start
 			if ( v < 0 ) //-1, unvisited
 			{
-				if ( LocalCanWalk( x , y ) ) //Check if this is blocked via world ent
+				if ( LocalCanWalkTo( lx , ly, x, y ) ) //Check if this is blocked via world ent
 				{
 					Queue.Add( new PathNode( x , y, ld + 1 ) );
 					localPathList[x , y] = ld + 1;
@@ -205,11 +205,14 @@ public partial class Pathfind
 	{
 		return map - Start + new Vector3( Depth  , Depth , 0 );
 	}
-	private bool LocalCanWalk(int x, int y)
+	private bool LocalCanWalkTo(int x1, int y1, int x2, int y2)
 	{
-		var v = LocalToMap( new Vector3( x, y ) );
-		int bx = (int)v.x + WorldEntity.radius;
-		int by = (int)v.y + WorldEntity.radius;
-		return WorldEntity.CanWalk( bx, by );
+		var v1 = LocalToMap( new Vector3( x1, y1 ) );
+		var v2 = LocalToMap( new Vector3 ( x2, y2 ) );
+		int bx = (int)v1.x + WorldEntity.radius;
+		int by = (int)v1.y + WorldEntity.radius;
+		int ex = (int)v2.x + WorldEntity.radius;
+		int ey = (int)v2.y + WorldEntity.radius;
+		return WorldEntity.CanWalkTo( bx, by, ex, ey );
 	}
 }

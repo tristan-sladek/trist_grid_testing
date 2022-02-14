@@ -6,7 +6,6 @@ public class MeshBuilder
 	List<SimpleVertex> wall_vertices = new();
 	float MAX = float.MinValue;
 	float MIN = float.MaxValue;
-	
 	private void AddVerts(bool floor, params SimpleVertex[] v)
 	{
 		if(floor)
@@ -48,8 +47,6 @@ public class MeshBuilder
 		Log.Info("Mesh created with " + (floor_vertices.Count + wall_vertices.Count) + " verts.");
 		return new ModelBuilder().AddMesh( floor_mesh ).AddMesh(wall_mesh).Create();
 	}
-	
-	//I am not proud of what I am about to do.
 	public MeshBuilder AddFloor( float x, float y, float z, float s )
 	{
 		x *= s;

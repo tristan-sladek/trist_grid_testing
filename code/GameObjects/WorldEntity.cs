@@ -1,4 +1,5 @@
 ﻿using Sandbox;
+using System;
 using System.Collections.Generic;
 public partial class WorldEntity : ModelEntity
 {
@@ -44,9 +45,6 @@ public partial class WorldEntity : ModelEntity
 					else if ( cH > eH )
 						m.AddWallE( cX, cY, eH, GRID_SCALE, 1, cH - eH );
 				}
-
-
-
 			}
 
 		Model = m.Build();
@@ -65,11 +63,27 @@ public partial class WorldEntity : ModelEntity
 			return GetHeight( x, y ) == 0;
 		return false;
 	}
+	public bool CanWalkTo(int x1, int y1, int x2, int y2)
+	{
+		if ( InBounds( x1 ) && InBounds( x2 ) && InBounds( y1 ) && InBounds( y2 ) )
+		{
+			var h1 = GetHeight( x1, y1 );
+			var h2 = GetHeight( x2, y2 );
+			return (Math.Abs( h1 - h2 ) <= 0.5);
+		}
+		return false;
+	}
 	public float GetHeight(int x, int y)
 	{
 		if(InBounds( x ) && InBounds( y ) )
 			return heightMap[x + y * maxR];
-		return 1;
+		return 0;
+	}
+	public float GetHeightFromWorld(float x, float y)
+	{
+		int ix = (int)(x / GRID_SCALE) + radius;
+		int iy = (int)(y / GRID_SCALE) + radius;
+		return GetHeight( ix, iy );
 	}
 	private void CreateHeightMap()
 	{
@@ -91,5 +105,4 @@ public partial class WorldEntity : ModelEntity
 			for ( int x = 0; x < maxR; x++ )
 				heightMap.Add( b[x, y] );
 	}
-	
 }
