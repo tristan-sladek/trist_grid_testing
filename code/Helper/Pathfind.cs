@@ -43,6 +43,8 @@ public partial class Pathfind
 	private int[,] localPathList;
 	private int Depth;
 	private int MaxDepth;
+	private Vector3 localStart;
+	private Vector3 localEnd;
 	public Pathfind Path( int depth = 16 )
 	{
 		Depth = depth;
@@ -51,8 +53,10 @@ public partial class Pathfind
 		for ( int x = 0; x < MaxDepth; x++ )
 			for ( int y = 0; y < MaxDepth; y++ )
 				localPathList[x, y] = -1; //default to unchecked;
-		var localStart = MapToLocal( Start );
-		var localEnd = MapToLocal( End );
+		
+		localStart = MapToLocal( Start );
+		localEnd = MapToLocal( End );
+		
 		// Log.Info( "MAP: " + Start + " | " + End + " : LOCAL: " + localStart + " | " + localEnd );
 		if ( localStart == localEnd ) return this; //Don't even try to pathfind to self
 		
@@ -91,68 +95,74 @@ public partial class Pathfind
 			CheckDSafe( x - 1, y, Queue, x, y, d );
 			CheckDSafe( x, y + 1, Queue, x, y, d );
 			CheckDSafe( x, y - 1, Queue, x, y, d );
-
 		}
 		if ( CanPathfind ) //path to end found, backtrack route
 		{
-			List<PathNode> Route = new();
-
-			int x = (int)localEnd.x;
-			int y = (int)localEnd.y;
-			int ex = (int)localStart.x;
-			int ey = (int)localStart.y;
-			int d = GetDSafe( x, y );
-			int s = 0;
-
-			while ( x != ex || y != ey )
-			{
-				Route.Add( new PathNode( x, y, d ) );
-				if ( ++s > MaxDepth ) {	// Log.Error( "Force Break! " + x + " | " + y ); PrintDepthTree();
-					break;
-				}
-
-				int minX = x;
-				int minY = y;
-				int minD = d;
-
-				if ( GetDSafe( x - 1, y ) < minD )
-				{
-					minD = GetDSafe( x - 1, y );
-					minX = x - 1;
-					minY = y;
-				}
-				if ( GetDSafe( x + 1, y ) < minD )
-				{
-					minD = GetDSafe( x + 1, y );
-					minX = x + 1;
-					minY = y;
-				}
-				if ( GetDSafe( x, y - 1 ) < minD )
-				{
-					minD = GetDSafe( x, y - 1 );
-					minX = x;
-					minY = y - 1;
-				}
-				if ( GetDSafe( x, y + 1 ) < minD )
-				{
-					minD = GetDSafe( x, y + 1 );
-					minX = x;
-					minY = y + 1;
-				}
-
-				d = minD;
-				x = minX;
-				y = minY;
-			}
-			// Log.Info( "Path Found! " + s );
-			var LastPath = Route[Route.Count - 1];
-
-			NextPos = new Vector3( LastPath.X - localStart.x, LastPath.Y - localStart.y, 0 );
+			GenerateRoute();
 		}
 		
 		//PrintDepthTree();
 
 		return this;
+	}
+	private void GenerateRoute()
+	{
+		List<PathNode> Route = new();
+
+		int x = (int)localEnd.x;
+		int y = (int)localEnd.y;
+		int ex = (int)localStart.x;
+		int ey = (int)localStart.y;
+		int d = GetDSafe( x, y );
+		int s = 0;
+
+		while ( x != ex || y != ey )
+		{
+			Route.Add( new PathNode( x, y, d ) );
+			if ( ++s > MaxDepth )
+			{
+				CanPathfind = false;
+				//Log.Error( "Force Break! " + x + " | " + y ); PrintDepthTree();
+				break;
+			}
+
+			int minX = x;
+			int minY = y;
+			int minD = d;
+
+			if ( GetDSafe( x - 1, y ) < minD && LocalCanWalkTo(x - 1, y, x, y ) )
+			{
+				minD = GetDSafe( x - 1, y );
+				minX = x - 1;
+				minY = y;
+			}
+			if ( GetDSafe( x + 1, y ) < minD && LocalCanWalkTo( x + 1, y, x, y ) )
+			{
+				minD = GetDSafe( x + 1, y );
+				minX = x + 1;
+				minY = y;
+			}
+			if ( GetDSafe( x, y - 1 ) < minD && LocalCanWalkTo( x, y - 1, x, y ) )
+			{
+				minD = GetDSafe( x, y - 1 );
+				minX = x;
+				minY = y - 1;
+			}
+			if ( GetDSafe( x, y + 1 ) < minD && LocalCanWalkTo( x, y + 1, x, y ) )
+			{
+				minD = GetDSafe( x, y + 1 );
+				minX = x;
+				minY = y + 1;
+			}
+
+			d = minD;
+			x = minX;
+			y = minY;
+		}
+		// Log.Info( "Path Found! " + s );
+		var LastPath = Route[Route.Count - 1];
+
+		NextPos = new Vector3( LastPath.X - localStart.x, LastPath.Y - localStart.y, 0 );
 	}
 	private void CheckDSafe(int x, int y, List<PathNode> Queue, int lx, int ly, int ld)
 	{ //Used for checking unvisited neighbors
@@ -175,6 +185,11 @@ public partial class Pathfind
 			{
 				ld = v + 1;
 				localPathList[lx, ly] = ld; //just update to make things smoother
+			}
+			else if( v == MaxDepth + 1 && LocalCanWalkTo(lx,ly,x,y) ) //marked as wall from one side, but I can walk to it.
+			{
+				Queue.Add( new PathNode( x, y, ld + 1 ) );
+				localPathList[x, y] = ld + 1;
 			}
 		}
 	}

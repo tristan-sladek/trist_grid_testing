@@ -69,7 +69,7 @@ public partial class WorldEntity : ModelEntity
 		{
 			var h1 = GetHeight( x1, y1 );
 			var h2 = GetHeight( x2, y2 );
-			return (Math.Abs( h1 - h2 ) <= 0.5);
+			return ( h2 - h1 <= 0.5);
 		}
 		return false;
 	}
