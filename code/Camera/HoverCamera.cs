@@ -29,13 +29,16 @@ public class HoverCamera : Camera
 	{
 		MoveInput = input.AnalogMove;
 
-		MoveMult = input.Down( InputButton.Run ) ? 2.5f : 1;
+		MoveMult = input.Down( InputButton.Run ) ? 3 : 1;
 
 		if ( input.Pressed( InputButton.Walk ) ) follow = !follow;
 
-		if( input.Down(InputButton.Attack2) )
+		if ( input.Down(InputButton.Attack2) )
 			LookInput += input.AnalogLook.WithRoll( 0 );
-		
+
+		if ( input.Pressed( InputButton.Slot1 ) ) BasePosition = BasePosition.WithZ( BasePosition.z + WorldEntity.GRID_SCALE * MoveMult );
+		if ( input.Pressed( InputButton.Slot2 ) ) BasePosition = BasePosition.WithZ( BasePosition.z - WorldEntity.GRID_SCALE * MoveMult );
+
 		CamDistance -= input.MouseWheel * 10;
 		CamDistance = CamDistance.Clamp( MIN_CAM, MAX_CAM );
 		

@@ -2,18 +2,28 @@
 using System.Collections.Generic;
 public class MeshBuilder
 {
-	List<SimpleVertex> floor_vertices = new();
-	List<SimpleVertex> wall_vertices = new();
+	List<Vertex> floor_vertices = new();
+	List<Vertex> wall_vertices = new();
 	float MAX = float.MinValue;
 	float MIN = float.MaxValue;
-	private void AddVerts(bool floor, params SimpleVertex[] v)
+	private void AddVerts(bool floor, params Vertex[] v)
 	{
 		if(floor)
 			foreach ( var vertex in v )
-				floor_vertices.Add( vertex );
+			{
+				var V = vertex;
+				V.Color = Color.Blue;
+				floor_vertices.Add( V );
+			}
+				
 		else
 			foreach ( var vertex in v )
-				wall_vertices.Add( vertex );
+			{
+				var V = vertex;
+				V.Color = Color.Red;
+				wall_vertices.Add( V );
+			}
+				
 	}
 	private void CheckMinMax(params float[] v)
 	{
@@ -29,20 +39,22 @@ public class MeshBuilder
 		Mesh wall_mesh = null;
 		if ( floor_vertices.Count > 0 )
 		{
-			floor_mesh = new Mesh( Material.Load( "materials/dev/dev_measuregeneric01.vmat" ) )
+			//floor_mesh = new Mesh( Material.Load( "materials/dev/dev_measuregeneric01.vmat" ) )
+			floor_mesh = new Mesh( Material.Load( "materials/dev/debug_wireframe.vmat" ) )
 			{
 				Bounds = new BBox( MIN, MAX )
 			};
-			floor_mesh.CreateVertexBuffer<SimpleVertex>( floor_vertices.Count, SimpleVertex.Layout, floor_vertices.ToArray() );
+			floor_mesh.CreateVertexBuffer<Vertex>( floor_vertices.Count, Vertex.Layout, floor_vertices.ToArray() );
 		}
 
 		if ( wall_vertices.Count > 0 )
 		{
-			wall_mesh = new Mesh( Material.Load( "materials/dev/dev_measuregeneric01b.vmat" ) )
+			//wall_mesh = new Mesh( Material.Load( "materials/dev/dev_measuregeneric01b.vmat" ) )
+			wall_mesh = new Mesh( Material.Load( "materials/dev/debug_wireframe.vmat" ) )
 			{
 				Bounds = new BBox( MIN, MAX )
 			};
-			wall_mesh.CreateVertexBuffer<SimpleVertex>( wall_vertices.Count, SimpleVertex.Layout, wall_vertices.ToArray() );
+			wall_mesh.CreateVertexBuffer<Vertex>( wall_vertices.Count, Vertex.Layout, wall_vertices.ToArray() );
 		}
 		Log.Info("Mesh created with " + (floor_vertices.Count + wall_vertices.Count) + " verts.");
 		return new ModelBuilder().AddMesh( floor_mesh ).AddMesh(wall_mesh).Create();
@@ -56,10 +68,10 @@ public class MeshBuilder
 		var N = Vector3.Up;
 		var T = Vector3.Forward;
 
-		var a = new SimpleVertex( new Vector3( x, y, z ), N, T, new Vector2( 0, 0 ) );
-		var b = new SimpleVertex( new Vector3( x + s, y, z ), N, T, new Vector2( 1, 0 ) );
-		var c = new SimpleVertex( new Vector3( x + s, y + s, z ), N, T, new Vector2( 1, 1 ) );
-		var d = new SimpleVertex( new Vector3( x, y + s, z ), N, T, new Vector2( 0, 1 ) );
+		var a = new Vertex( new Vector3( x, y, z ), N, T, new Vector2( 0, 0 ) );
+		var b = new Vertex( new Vector3( x + s, y, z ), N, T, new Vector2( 1, 0 ) );
+		var c = new Vertex( new Vector3( x + s, y + s, z ), N, T, new Vector2( 1, 1 ) );
+		var d = new Vertex( new Vector3( x, y + s, z ), N, T, new Vector2( 0, 1 ) );
 
 		AddVerts( true, a, b, c, c, d, a );
 
@@ -82,10 +94,10 @@ public class MeshBuilder
 		var v3 = z;
 		var v4 = z + s * h;
 
-		var a = new SimpleVertex( new Vector3( of, v1, v3 ), N, T, new Vector2( 0, 0 ) );
-		var b = new SimpleVertex( new Vector3( of, v2, v3 ), N, T, new Vector2( w, 0 ) );
-		var c = new SimpleVertex( new Vector3( of, v2, v4 ), N, T, new Vector2( w, h ) );
-		var d = new SimpleVertex( new Vector3( of, v1, v4 ), N, T, new Vector2( 0, h ) );
+		var a = new Vertex( new Vector3( of, v1, v3 ), N, T, new Vector2( 0, 0 ) );
+		var b = new Vertex( new Vector3( of, v2, v3 ), N, T, new Vector2( w, 0 ) );
+		var c = new Vertex( new Vector3( of, v2, v4 ), N, T, new Vector2( w, h ) );
+		var d = new Vertex( new Vector3( of, v1, v4 ), N, T, new Vector2( 0, h ) );
 
 		AddVerts( false, a, b, c, c, d, a );
 
@@ -107,10 +119,10 @@ public class MeshBuilder
 		var v3 = z;
 		var v4 = z + s * h;
 
-		var a = new SimpleVertex( new Vector3( x, v1, v3 ), N, T, new Vector2( 0, 0 ) );
-		var b = new SimpleVertex( new Vector3( x, v1, v4 ), N, T, new Vector2( h, 0 ) );
-		var c = new SimpleVertex( new Vector3( x, v2, v4 ), N, T, new Vector2( h, w ) );
-		var d = new SimpleVertex( new Vector3( x, v2, v3 ), N, T, new Vector2( 0, w ) );
+		var a = new Vertex( new Vector3( x, v1, v3 ), N, T, new Vector2( 0, 0 ) );
+		var b = new Vertex( new Vector3( x, v1, v4 ), N, T, new Vector2( h, 0 ) );
+		var c = new Vertex( new Vector3( x, v2, v4 ), N, T, new Vector2( h, w ) );
+		var d = new Vertex( new Vector3( x, v2, v3 ), N, T, new Vector2( 0, w ) );
 
 		AddVerts( false, a, b, c, c, d, a );
 
@@ -132,10 +144,10 @@ public class MeshBuilder
 		var v3 = z;
 		var v4 = z + s * h;
 
-		var a = new SimpleVertex( new Vector3( v1, y, v3 ), N, T, new Vector2( 0, 0 ) );
-		var b = new SimpleVertex( new Vector3( v2, y, v3 ), N, T, new Vector2( w, 0 ) );
-		var c = new SimpleVertex( new Vector3( v2, y, v4 ), N, T, new Vector2( w, h ) );
-		var d = new SimpleVertex( new Vector3( v1, y, v4 ), N, T, new Vector2( 0, h ) );
+		var a = new Vertex( new Vector3( v1, y, v3 ), N, T, new Vector2( 0, 0 ) );
+		var b = new Vertex( new Vector3( v2, y, v3 ), N, T, new Vector2( w, 0 ) );
+		var c = new Vertex( new Vector3( v2, y, v4 ), N, T, new Vector2( w, h ) );
+		var d = new Vertex( new Vector3( v1, y, v4 ), N, T, new Vector2( 0, h ) );
 
 		AddVerts( false, a, b, c, c, d, a );
 
@@ -158,10 +170,10 @@ public class MeshBuilder
 		var v3 = z;
 		var v4 = z + s * h;
 
-		var a = new SimpleVertex( new Vector3( v1, of, v3 ), N, T, new Vector2( 0, 0 ) );
-		var b = new SimpleVertex( new Vector3( v1, of, v4 ), N, T, new Vector2( h, 0 ) );
-		var c = new SimpleVertex( new Vector3( v2, of, v4 ), N, T, new Vector2( h, w ) );
-		var d = new SimpleVertex( new Vector3( v2, of, v3 ), N, T, new Vector2( 0, w ) );
+		var a = new Vertex( new Vector3( v1, of, v3 ), N, T, new Vector2( 0, 0 ) );
+		var b = new Vertex( new Vector3( v1, of, v4 ), N, T, new Vector2( h, 0 ) );
+		var c = new Vertex( new Vector3( v2, of, v4 ), N, T, new Vector2( h, w ) );
+		var d = new Vertex( new Vector3( v2, of, v3 ), N, T, new Vector2( 0, w ) );
 
 		AddVerts( false, a, b, c, c, d, a );
 
