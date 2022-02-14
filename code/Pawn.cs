@@ -33,7 +33,7 @@ public partial class Pawn : ModelEntity
 			int y = (int) hit.y + WorldEntity.radius;
 			
 			//Log.Info( "x:" + x + " y:" + y + "| Can Walk: " + WorldEntity.canWalk( x, y ) +" | Relative to Center x:" + (int)hit.x + " y:" + (int)hit.y );
-			if ( WorldEntity.canWalk( x, y ) )
+			if ( WorldEntity.CanWalk( x, y ) )
 			{
 				WishPos = hit;
 				//Moving = false;

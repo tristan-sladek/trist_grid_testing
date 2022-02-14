@@ -68,73 +68,103 @@ public class MeshBuilder
 
 		return this;
 	}
-	public MeshBuilder AddWallN( float x, float y, float z, float s )
+	public MeshBuilder AddWallE( float x, float y, float z = 0, float s = 16, float w = 1, float h = 1 )
 	{
+		// all grid values scaled by grid scale
 		x *= s;
 		y *= s;
 		z *= s;
 		CheckMinMax( x, y, z );
-		var N = Vector3.Forward;
-		var T = Vector3.Down;
+		var N = Vector3.Forward; // normal
+		var T = Vector3.Down;    // tangent
 
-		var a = new SimpleVertex( new Vector3( x + s, y, z ), N, T, new Vector2( 0, 0 ) );
-		var b = new SimpleVertex( new Vector3( x + s, y + s, z ), N, T, new Vector2( 1, 0 ) );
-		var c = new SimpleVertex( new Vector3( x + s, y + s, z + s ), N, T, new Vector2( 1, 1 ) );
-		var d = new SimpleVertex( new Vector3( x + s, y, z + s ), N, T, new Vector2( 0, 1 ) );
+		var of = x + s; // x is offset by grid_scale
+		//square is on y * z plane
+		var v1 = y;
+		var v2 = y + s * w;
+		var v3 = z;
+		var v4 = z + s * h;
+
+		var a = new SimpleVertex( new Vector3( of, v1, v3 ), N, T, new Vector2( 0, 0 ) );
+		var b = new SimpleVertex( new Vector3( of, v2, v3 ), N, T, new Vector2( w, 0 ) );
+		var c = new SimpleVertex( new Vector3( of, v2, v4 ), N, T, new Vector2( w, h ) );
+		var d = new SimpleVertex( new Vector3( of, v1, v4 ), N, T, new Vector2( 0, h ) );
 
 		AddVerts( false, a, b, c, c, d, a );
 
 		return this;
 	}
-	public MeshBuilder AddWallS( float x, float y, float z, float s )
+	public MeshBuilder AddWallW( float x, float y, float z = 0, float s = 16, float w = 1, float h = 1 )
 	{
+		// all grid values scaled by grid scale
 		x *= s;
 		y *= s;
 		z *= s;
 		CheckMinMax( x, y, z );
-		var N = Vector3.Backward;
-		var T = Vector3.Up;
+		var N = Vector3.Backward; // normal
+		var T = Vector3.Up;		  // tangent
 
-		var a = new SimpleVertex( new Vector3( x, y, z ), N, T, new Vector2( 0, 0 ) );
-		var b = new SimpleVertex( new Vector3( x, y, z + s ), N, T, new Vector2( 1, 0 ) );
-		var c = new SimpleVertex( new Vector3( x, y + s, z + s ), N, T, new Vector2( 1, 1 ) );
-		var d = new SimpleVertex( new Vector3( x, y + s, z ), N, T, new Vector2( 0, 1 ) );
+		//square is on y * z plane
+		var v1 = y;
+		var v2 = y + s * w;
+		var v3 = z;
+		var v4 = z + s * h;
+
+		var a = new SimpleVertex( new Vector3( x, v1, v3 ), N, T, new Vector2( 0, 0 ) );
+		var b = new SimpleVertex( new Vector3( x, v1, v4 ), N, T, new Vector2( h, 0 ) );
+		var c = new SimpleVertex( new Vector3( x, v2, v4 ), N, T, new Vector2( h, w ) );
+		var d = new SimpleVertex( new Vector3( x, v2, v3 ), N, T, new Vector2( 0, w ) );
 
 		AddVerts( false, a, b, c, c, d, a );
 
 		return this;
 	}
-	public MeshBuilder AddWallE( float x, float y, float z, float s )
+	public MeshBuilder AddWallS( float x, float y, float z = 0, float s = 16, float w = 1, float h = 1 )
 	{
+		// all grid values scaled by grid scale
 		x *= s;
 		y *= s;
 		z *= s;
 		CheckMinMax( x, y, z );
-		var N = Vector3.Right;
-		var T = Vector3.Down;
+		var N = Vector3.Right; // normal
+		var T = Vector3.Down;  // tangent
 
-		var a = new SimpleVertex( new Vector3( x, y, z ), N, T, new Vector2( 0, 0 ) );
-		var b = new SimpleVertex( new Vector3( x + s, y, z ), N, T, new Vector2( 1, 0 ) );
-		var c = new SimpleVertex( new Vector3( x + s, y, z + s ), N, T, new Vector2( 1, 1 ) );
-		var d = new SimpleVertex( new Vector3( x, y, z + s ), N, T, new Vector2( 0, 1 ) );
+		//square is on x * z plane
+		var v1 = x;
+		var v2 = x + s * w;
+		var v3 = z;
+		var v4 = z + s * h;
+
+		var a = new SimpleVertex( new Vector3( v1, y, v3 ), N, T, new Vector2( 0, 0 ) );
+		var b = new SimpleVertex( new Vector3( v2, y, v3 ), N, T, new Vector2( w, 0 ) );
+		var c = new SimpleVertex( new Vector3( v2, y, v4 ), N, T, new Vector2( w, h ) );
+		var d = new SimpleVertex( new Vector3( v1, y, v4 ), N, T, new Vector2( 0, h ) );
 
 		AddVerts( false, a, b, c, c, d, a );
 
 		return this;
 	}
-	public MeshBuilder AddWallW( float x, float y, float z, float s )
+	public MeshBuilder AddWallN( float x, float y, float z = 0, float s = 16, float w = 1, float h = 1 )
 	{
+		// all grid values scaled by grid scale
 		x *= s;
 		y *= s;
 		z *= s;
 		CheckMinMax( x, y, z );
-		var N = Vector3.Left;
-		var T = Vector3.Down;
+		var N = Vector3.Left; // normal
+		var T = Vector3.Down; // tangent
+		
+		var of = y + s; // y is offset by grid_scale
+		//square is on x * z plane
+		var v1 = x;
+		var v2 = x + s * w;
+		var v3 = z;
+		var v4 = z + s * h;
 
-		var a = new SimpleVertex( new Vector3( x, y + s, z ), N, T, new Vector2( 0, 0 ) );
-		var b = new SimpleVertex( new Vector3( x, y + s, z + s ), N, T, new Vector2( 1, 0 ) );
-		var c = new SimpleVertex( new Vector3( x + s, y + s, z + s ), N, T, new Vector2( 1, 1 ) );
-		var d = new SimpleVertex( new Vector3( x + s, y + s, z ), N, T, new Vector2( 0, 1 ) );
+		var a = new SimpleVertex( new Vector3( v1, of, v3 ), N, T, new Vector2( 0, 0 ) );
+		var b = new SimpleVertex( new Vector3( v1, of, v4 ), N, T, new Vector2( h, 0 ) );
+		var c = new SimpleVertex( new Vector3( v2, of, v4 ), N, T, new Vector2( h, w ) );
+		var d = new SimpleVertex( new Vector3( v2, of, v3 ), N, T, new Vector2( 0, w ) );
 
 		AddVerts( false, a, b, c, c, d, a );
 

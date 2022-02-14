@@ -210,6 +210,6 @@ public partial class Pathfind
 		var v = LocalToMap( new Vector3( x, y ) );
 		int bx = (int)v.x + WorldEntity.radius;
 		int by = (int)v.y + WorldEntity.radius;
-		return WorldEntity.canWalk( bx, by );
+		return WorldEntity.CanWalk( bx, by );
 	}
 }
