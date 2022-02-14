@@ -28,7 +28,6 @@ public partial class WorldEntity : ModelEntity
 				float eH = GetHeight( x + 1, y ); //east Height
 				float nH = GetHeight( x, y + 1 ); //north Height
 
-
 				if ( InBounds( y + 1 ) ) //compare north height
 				{
 					// no walls on ==
@@ -76,7 +75,7 @@ public partial class WorldEntity : ModelEntity
 	public float GetHeight(int x, int y)
 	{
 		int index = x + y * maxR;
-		if ( index < heightMap.Count - 1  && InBounds( x ) && InBounds( y ) )
+		if ( index < heightMap.Count && InBounds( x ) && InBounds( y ) )
 			return (float) (heightMap[index]) / 2;
 		return 0;
 	}
@@ -94,7 +93,7 @@ public partial class WorldEntity : ModelEntity
 		for ( int x = 0; x < maxR; x++ )
 			for ( int y = 0; y < maxR; y++ )
 				if ( x == 0 || y == 0 || x == maxR - 1 || y == maxR - 1 )
-					b[x, y] = 4;
+					b[x, y] = 64;
 		
 		// Random Shit
 		for ( int i = 0; i < radius * radius; i++ )
@@ -110,13 +109,10 @@ public partial class WorldEntity : ModelEntity
 			{
 				b[x, y] = 0;
 			}
-
 		for(int x = 0; x < 15; x++)
 		{
 			b[radius + x - 7, radius + 4] = (short) x;
 		}
-
-
 		// Load Heightmap
 		for ( int y = 0; y < maxR; y++ )
 			for ( int x = 0; x < maxR; x++ )

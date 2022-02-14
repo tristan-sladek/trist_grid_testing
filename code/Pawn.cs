@@ -67,7 +67,7 @@ public partial class Pawn : ModelEntity
 	private void PathfindToWish(Vector3 PosOnGrid)
 	{
 		PosOnGrid = PosOnGrid.WithZ( 0 );
-		var p = new Pathfind( WorldEntity ).FromPosition( PosOnGrid ).ToPosition( WishPos ).Path();
+		var p = new Pathfind( WorldEntity ).FromPosition( PosOnGrid ).ToPosition( WishPos ).Path(63);
 		
 		if(!p.CanPathfind) { WishPos = PosOnGrid; return; }
 

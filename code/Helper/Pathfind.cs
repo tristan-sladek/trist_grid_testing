@@ -101,7 +101,7 @@ public partial class Pathfind
 			GenerateRoute();
 		}
 		
-		PrintDepthTree();
+		//PrintDepthTree();
 
 		return this;
 	}
@@ -189,7 +189,7 @@ public partial class Pathfind
 		}
 		else if( v == MaxDepth + 1 && LocalCanWalkTo(lx,ly,x,y) ) //marked as wall from one side, but I can walk to it.
 		{
-			Queue.Add( new PathNode( x, y ) );
+			Queue.Insert(0, new PathNode( x, y ) );
 			localPathList[x, y] = ld + 1;
 		}		
 	}
