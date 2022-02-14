@@ -2,28 +2,32 @@
 using System.Collections.Generic;
 public class MeshBuilder
 {
-	List<Vertex> floor_vertices = new();
-	List<Vertex> wall_vertices = new();
+	List<Vertex> vertices = new();
 	float MAX = float.MinValue;
 	float MIN = float.MaxValue;
-	private void AddVerts(bool floor, params Vertex[] v)
+	private void AddQuad( Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4 )
 	{
-		if(floor)
-			foreach ( var vertex in v )
-			{
-				var V = vertex;
-				V.Color = Color.Blue;
-				floor_vertices.Add( V );
-			}
-				
-		else
-			foreach ( var vertex in v )
-			{
-				var V = vertex;
-				V.Color = Color.Red;
-				wall_vertices.Add( V );
-			}
-				
+		Vector3 N = (v1 - v2).Cross( v1 - v3 ) * -1;
+		Vector3 T = (v2 - v1).Normal * -1;
+		
+		Vertex a = new Vertex( v1, N, T, new Vector2( 0, 0 ) );
+		a.Color = Color.Blue;
+		Vertex b = new Vertex( v2, N, T, new Vector2( 0, 1 ) );
+		b.Color = Color.Red;
+		Vertex c = new Vertex( v3, N, T, new Vector2( 1, 0 ) );
+		c.Color = Color.Green;
+		Vertex d = new Vertex( v4, N, T, new Vector2( 1, 1 ) );
+		d.Color = Color.White;
+
+		AddVerts( a, c, b, d, b, c );
+
+	}
+	private void AddVerts(params Vertex[] v)
+	{
+		foreach ( var vertex in v )
+		{
+			vertices.Add( vertex );
+		}		
 	}
 	private void CheckMinMax(params float[] v)
 	{
@@ -35,29 +39,20 @@ public class MeshBuilder
 	}
 	public Model Build()
 	{
-		Mesh floor_mesh = null;
-		Mesh wall_mesh = null;
-		if ( floor_vertices.Count > 0 )
+		Mesh mesh = null;		
+		if ( vertices.Count > 0 )
 		{
-			//floor_mesh = new Mesh( Material.Load( "materials/dev/dev_measuregeneric01.vmat" ) )
-			floor_mesh = new Mesh( Material.Load( "materials/dev/debug_wireframe.vmat" ) )
+			mesh = new Mesh( Material.Load( "materials/dev/dev_measuregeneric01.vmat" ) )
+			//mesh = new Mesh( Material.Load( "materials/dev/debug_wireframe.vmat" ) )
 			{
 				Bounds = new BBox( MIN, MAX )
 			};
-			floor_mesh.CreateVertexBuffer<Vertex>( floor_vertices.Count, Vertex.Layout, floor_vertices.ToArray() );
+			mesh.CreateVertexBuffer<Vertex>( vertices.Count, Vertex.Layout, vertices.ToArray() );
 		}
 
-		if ( wall_vertices.Count > 0 )
-		{
-			//wall_mesh = new Mesh( Material.Load( "materials/dev/dev_measuregeneric01b.vmat" ) )
-			wall_mesh = new Mesh( Material.Load( "materials/dev/debug_wireframe.vmat" ) )
-			{
-				Bounds = new BBox( MIN, MAX )
-			};
-			wall_mesh.CreateVertexBuffer<Vertex>( wall_vertices.Count, Vertex.Layout, wall_vertices.ToArray() );
-		}
-		Log.Info("Mesh created with " + (floor_vertices.Count + wall_vertices.Count) + " verts.");
-		return new ModelBuilder().AddMesh( floor_mesh ).AddMesh(wall_mesh).Create();
+		Log.Info("Mesh created with " + (vertices.Count) + " verts.");
+		
+		return new ModelBuilder().AddMesh(mesh).Create();
 	}
 	public MeshBuilder AddFloor( float x, float y, float z, float s )
 	{
@@ -65,16 +60,13 @@ public class MeshBuilder
 		y *= s;
 		z *= s;
 		CheckMinMax( x, y, z );
-		var N = Vector3.Up;
-		var T = Vector3.Forward;
-
-		var a = new Vertex( new Vector3( x, y, z ), N, T, new Vector2( 0, 0 ) );
-		var b = new Vertex( new Vector3( x + s, y, z ), N, T, new Vector2( 1, 0 ) );
-		var c = new Vertex( new Vector3( x + s, y + s, z ), N, T, new Vector2( 1, 1 ) );
-		var d = new Vertex( new Vector3( x, y + s, z ), N, T, new Vector2( 0, 1 ) );
-
-		AddVerts( true, a, b, c, c, d, a );
-
+		AddQuad(
+			new Vector3( x, y, z ),
+			new Vector3( x, y + s, z ),
+			new Vector3( x + s, y, z ),
+			new Vector3( x + s, y + s, z )
+		);
+		
 		return this;
 	}
 	public MeshBuilder AddWallE( float x, float y, float z = 0, float s = 16, float w = 1, float h = 1 )
@@ -83,24 +75,17 @@ public class MeshBuilder
 		x *= s;
 		y *= s;
 		z *= s;
+		x += s;
+		var y2 = y + s * w;
+		var z2 = z + s * h;
 		CheckMinMax( x, y, z );
-		var N = Vector3.Forward; // normal
-		var T = Vector3.Down;    // tangent
-
-		var of = x + s; // x is offset by grid_scale
-		//square is on y * z plane
-		var v1 = y;
-		var v2 = y + s * w;
-		var v3 = z;
-		var v4 = z + s * h;
-
-		var a = new Vertex( new Vector3( of, v1, v3 ), N, T, new Vector2( 0, 0 ) );
-		var b = new Vertex( new Vector3( of, v2, v3 ), N, T, new Vector2( w, 0 ) );
-		var c = new Vertex( new Vector3( of, v2, v4 ), N, T, new Vector2( w, h ) );
-		var d = new Vertex( new Vector3( of, v1, v4 ), N, T, new Vector2( 0, h ) );
-
-		AddVerts( false, a, b, c, c, d, a );
-
+		AddQuad(
+			new Vector3( x, y, z ),
+			new Vector3( x, y, z2 ),
+			new Vector3( x, y2, z ),
+			new Vector3( x, y2, z2 )
+		);
+		
 		return this;
 	}
 	public MeshBuilder AddWallW( float x, float y, float z = 0, float s = 16, float w = 1, float h = 1 )
@@ -110,47 +95,17 @@ public class MeshBuilder
 		y *= s;
 		z *= s;
 		CheckMinMax( x, y, z );
-		var N = Vector3.Backward; // normal
-		var T = Vector3.Up;		  // tangent
 
-		//square is on y * z plane
-		var v1 = y;
-		var v2 = y + s * w;
-		var v3 = z;
-		var v4 = z + s * h;
+		var y2 = y + s * w;
+		var z2 = z + s * h;
 
-		var a = new Vertex( new Vector3( x, v1, v3 ), N, T, new Vector2( 0, 0 ) );
-		var b = new Vertex( new Vector3( x, v1, v4 ), N, T, new Vector2( h, 0 ) );
-		var c = new Vertex( new Vector3( x, v2, v4 ), N, T, new Vector2( h, w ) );
-		var d = new Vertex( new Vector3( x, v2, v3 ), N, T, new Vector2( 0, w ) );
-
-		AddVerts( false, a, b, c, c, d, a );
-
-		return this;
-	}
-	public MeshBuilder AddWallS( float x, float y, float z = 0, float s = 16, float w = 1, float h = 1 )
-	{
-		// all grid values scaled by grid scale
-		x *= s;
-		y *= s;
-		z *= s;
-		CheckMinMax( x, y, z );
-		var N = Vector3.Right; // normal
-		var T = Vector3.Down;  // tangent
-
-		//square is on x * z plane
-		var v1 = x;
-		var v2 = x + s * w;
-		var v3 = z;
-		var v4 = z + s * h;
-
-		var a = new Vertex( new Vector3( v1, y, v3 ), N, T, new Vector2( 0, 0 ) );
-		var b = new Vertex( new Vector3( v2, y, v3 ), N, T, new Vector2( w, 0 ) );
-		var c = new Vertex( new Vector3( v2, y, v4 ), N, T, new Vector2( w, h ) );
-		var d = new Vertex( new Vector3( v1, y, v4 ), N, T, new Vector2( 0, h ) );
-
-		AddVerts( false, a, b, c, c, d, a );
-
+		AddQuad(
+			new Vector3( x, y, z ),
+			new Vector3( x, y2, z ),
+			new Vector3( x, y, z2 ),
+			new Vector3( x, y2, z2 )
+		);
+		
 		return this;
 	}
 	public MeshBuilder AddWallN( float x, float y, float z = 0, float s = 16, float w = 1, float h = 1 )
@@ -160,23 +115,37 @@ public class MeshBuilder
 		y *= s;
 		z *= s;
 		CheckMinMax( x, y, z );
-		var N = Vector3.Left; // normal
-		var T = Vector3.Down; // tangent
+
+		y += s;
+		var x2 = x + s * w;
+		var z2 = z + s * h;
+
+		AddQuad(
+			new Vector3( x2, y, z ),
+			new Vector3( x2, y, z2 ),
+			new Vector3( x, y, z ),
+			new Vector3( x, y, z2 )
+		);
+		return this;
+	}
+	public MeshBuilder AddWallS( float x, float y, float z = 0, float s = 16, float w = 1, float h = 1 )
+	{
+		// all grid values scaled by grid scale
+		x *= s;
+		y *= s;
+		z *= s;
+		CheckMinMax( x, y, z );
+
+		var x2 = x + s * w;
+		var z2 = z + s * h;
+
+		AddQuad(
+			new Vector3( x, y, z ),
+			new Vector3( x, y, z2 ),
+			new Vector3( x2, y, z ),
+			new Vector3( x2, y, z2 )
+		);
 		
-		var of = y + s; // y is offset by grid_scale
-		//square is on x * z plane
-		var v1 = x;
-		var v2 = x + s * w;
-		var v3 = z;
-		var v4 = z + s * h;
-
-		var a = new Vertex( new Vector3( v1, of, v3 ), N, T, new Vector2( 0, 0 ) );
-		var b = new Vertex( new Vector3( v1, of, v4 ), N, T, new Vector2( h, 0 ) );
-		var c = new Vertex( new Vector3( v2, of, v4 ), N, T, new Vector2( h, w ) );
-		var d = new Vertex( new Vector3( v2, of, v3 ), N, T, new Vector2( 0, w ) );
-
-		AddVerts( false, a, b, c, c, d, a );
-
 		return this;
 	}
 }
