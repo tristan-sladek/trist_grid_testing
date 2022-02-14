@@ -90,16 +90,20 @@ public partial class WorldEntity : ModelEntity
 	{
 		var b = new short[maxR, maxR];
 
+		// Put shell around walls
 		for ( int x = 0; x < maxR; x++ )
 			for ( int y = 0; y < maxR; y++ )
 				if ( x == 0 || y == 0 || x == maxR - 1 || y == maxR - 1 )
 					b[x, y] = 4;
+		
+		// Random Shit
 		for ( int i = 0; i < radius * radius; i++ )
 		{
 			short f = (short) Rand.Int( 1, 4 );
 			b[Rand.Int( 1, radius * 2 - 1 ), Rand.Int( 1, radius * 2 - 1 )] = f;
 		}
-
+		
+		// Flatten Middle
 		var cSize = 14;
 		for(int x = radius - cSize; x < radius + cSize; x++ )
 			for ( int y = radius - cSize; y < radius + cSize; y++ )
@@ -107,8 +111,13 @@ public partial class WorldEntity : ModelEntity
 				b[x, y] = 0;
 			}
 
+		for(int x = 0; x < 15; x++)
+		{
+			b[radius + x - 7, radius + 4] = (short) x;
+		}
 
 
+		// Load Heightmap
 		for ( int y = 0; y < maxR; y++ )
 			for ( int x = 0; x < maxR; x++ )
 				heightMap.Add( b[x, y] );

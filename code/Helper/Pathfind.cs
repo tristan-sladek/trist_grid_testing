@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 internal class PathNode
 {
-	public int X, Y, D;
-	public PathNode( int x, int y, int d) { X = x; Y = y; D = d; }
-	public PathNode( float x, float y, int d) { X = (int)x; Y = (int)y; D = d; }
+	public int X, Y;
+	public PathNode( int x, int y) { X = x; Y = y; }
+	public PathNode( float x, float y) { X = (int)x; Y = (int)y; }
 }
 public partial class Pathfind
 {
@@ -66,7 +66,7 @@ public partial class Pathfind
 
 		//BFS to find path
 		List<PathNode> Queue = new();
-		Queue.Add( new PathNode(localStart.x,localStart.y,0) );
+		Queue.Add( new PathNode(localStart.x,localStart.y) );
 		localPathList[(int)localStart.x, (int)localStart.y] = 0;
 
 		int c = 0; 
@@ -81,7 +81,7 @@ public partial class Pathfind
 
 			int x = curNode.X;
 			int y = curNode.Y;
-			int d = curNode.D;
+			int d = localPathList[x,y];
 
 			// Final Node Found
 			if ( new Vector3( x, y, 0) == localEnd )
@@ -101,7 +101,7 @@ public partial class Pathfind
 			GenerateRoute();
 		}
 		
-		//PrintDepthTree();
+		PrintDepthTree();
 
 		return this;
 	}
@@ -118,7 +118,7 @@ public partial class Pathfind
 
 		while ( x != ex || y != ey )
 		{
-			Route.Add( new PathNode( x, y, d ) );
+			Route.Add( new PathNode( x, y ) );
 			if ( ++s > MaxDepth )
 			{
 				CanPathfind = false;
@@ -166,32 +166,32 @@ public partial class Pathfind
 	}
 	private void CheckDSafe(int x, int y, List<PathNode> Queue, int lx, int ly, int ld)
 	{ //Used for checking unvisited neighbors
-		if ( x < MaxDepth && x >= 0 && y < MaxDepth && y >= 0) // In Range
+		if ( !(x < MaxDepth && x >= 0 && y < MaxDepth && y >= 0) ) return; // In Range
+		
+		var v = localPathList[x , y]; //Current Distance from start
+
+		if ( v < 0 ) //-1, unvisited
 		{
-			var v = localPathList[x , y]; //Current Distance from start
-			if ( v < 0 ) //-1, unvisited
+			if ( LocalCanWalkTo( lx , ly, x, y ) ) //Check if this is blocked via world ent
 			{
-				if ( LocalCanWalkTo( lx , ly, x, y ) ) //Check if this is blocked via world ent
-				{
-					Queue.Add( new PathNode( x , y, ld + 1 ) );
-					localPathList[x , y] = ld + 1;
-				}
-				else
-				{
-					localPathList[x , y] = MaxDepth + 1; //MaxDepth + 1, farther than anything
-				}
+				Queue.Add( new PathNode( x , y ) );
+				localPathList[x , y] = ld + 1;
 			}
-			else if ( v < ld ) //more efficient path found from prev stuff
+			else
 			{
-				ld = v + 1;
-				localPathList[lx, ly] = ld; //just update to make things smoother
-			}
-			else if( v == MaxDepth + 1 && LocalCanWalkTo(lx,ly,x,y) ) //marked as wall from one side, but I can walk to it.
-			{
-				Queue.Add( new PathNode( x, y, ld + 1 ) );
-				localPathList[x, y] = ld + 1;
+				localPathList[x , y] = MaxDepth + 1; //MaxDepth + 1, farther than anything
 			}
 		}
+		else if ( v < ld && LocalCanWalkTo( lx, ly, x, y ) && LocalCanWalkTo( x, y, lx, ly ) ) //more efficient path found from prev stuff
+		{
+			ld = v + 1;
+			localPathList[lx, ly] = ld; //just update to make things smoother
+		}
+		else if( v == MaxDepth + 1 && LocalCanWalkTo(lx,ly,x,y) ) //marked as wall from one side, but I can walk to it.
+		{
+			Queue.Add( new PathNode( x, y ) );
+			localPathList[x, y] = ld + 1;
+		}		
 	}
 	private int GetDSafe(int x, int y)
 	{
