@@ -143,7 +143,6 @@ public class MeshBuilder
 	private GridWorld CurrentGridWorld;
 	private int ChunkX;
 	private int ChunkY;
-
 	public Model Build( GridWorld currentGridWorld, int chunkX, int chunkY )
 	{
 		CurrentGridWorld = currentGridWorld;

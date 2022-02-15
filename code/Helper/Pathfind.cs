@@ -7,23 +7,23 @@ internal class PathNode
 	public PathNode( int x, int y) { X = x; Y = y; }
 	public PathNode( float x, float y) { X = (int)x; Y = (int)y; }
 }
-/*
+
 public partial class Pathfind
 {
-	ChunkEntity WorldEntity { get; set; }
+	GridWorld CurrentGridWorld { get; set; }
 	public bool CanPathfind { get; set; }
-	public Vector3 NextPos { get; set; } = Vector3.Zero;
+	public Vector2 NextPos { get; set; } = Vector3.Zero;
 	private Vector3 Start { get; set; }
 	private Vector3 End { get; set; }
-	public Pathfind( ChunkEntity w)
+	public Pathfind( GridWorld currentGridWorld )
 	{
-		WorldEntity = w;
+		CurrentGridWorld = currentGridWorld;
 	}
 	public Pathfind FromPosition(Vector3 InStart, bool OnGrid = true )
 	{
 		if(!OnGrid)
 		{
-			InStart /= ChunkEntity.GRID_SCALE;
+			InStart /= GridWorld.GRID_SCALE;
 			Start = InStart;
 		}
 		else Start = InStart;
@@ -34,7 +34,7 @@ public partial class Pathfind
 	{
 		if ( !OnGrid )
 		{
-			InEnd /= ChunkEntity.GRID_SCALE;
+			InEnd /= GridWorld.GRID_SCALE;
 			End = InEnd;
 		}
 		else End = InEnd;
@@ -55,8 +55,8 @@ public partial class Pathfind
 			for ( int y = 0; y < MaxDepth; y++ )
 				localPathList[x, y] = -1; //default to unchecked;
 		
-		localStart = MapToLocal( Start );
-		localEnd = MapToLocal( End );
+		localStart = WorldToLocal( Start );
+		localEnd = WorldToLocal( End );
 		
 		// Log.Info( "MAP: " + Start + " | " + End + " : LOCAL: " + localStart + " | " + localEnd );
 		if ( localStart == localEnd ) return this; //Don't even try to pathfind to self
@@ -188,7 +188,7 @@ public partial class Pathfind
 			ld = v + 1;
 			localPathList[lx, ly] = ld; //just update to make things smoother
 		}
-		else if( v == MaxDepth + 1 && LocalCanWalkTo(lx,ly,x,y) ) //marked as wall from one side, but I can walk to it.
+		else if( v == MaxDepth + 1 && LocalCanWalkTo( lx,ly,x,y) ) //marked as wall from one side, but I can walk to it.
 		{
 			Queue.Insert(0, new PathNode( x, y ) );
 			localPathList[x, y] = ld + 1;
@@ -213,23 +213,19 @@ public partial class Pathfind
 			Log.Info( s );
 		}
 	}
-	private Vector3 LocalToMap( Vector3 local )
+	public Vector3 LocalToWorld( Vector3 local )
 	{
 		return local + Start - new Vector3( Depth , Depth , 0 );
 	}
-	private Vector3 MapToLocal(Vector3 map)
+	public Vector3 WorldToLocal( Vector3 map)
 	{
 		return map - Start + new Vector3( Depth  , Depth , 0 );
 	}
-	private bool LocalCanWalkTo(int x1, int y1, int x2, int y2)
+	private bool LocalCanWalkTo(int xb, int yb, int xe, int ye)
 	{
-		var v1 = LocalToMap( new Vector3( x1, y1 ) );
-		var v2 = LocalToMap( new Vector3 ( x2, y2 ) );
-		int bx = (int)v1.x + ChunkEntity.ChunkSize;
-		int by = (int)v1.y + ChunkEntity.ChunkSize;
-		int ex = (int)v2.x + ChunkEntity.ChunkSize;
-		int ey = (int)v2.y + ChunkEntity.ChunkSize;
-		return WorldEntity.CanWalkAtoB( bx, by, ex, ey );
-	}
+		var ha = CurrentGridWorld.GetHeightFromWorld( LocalToWorld( new Vector2( xb, yb ) ) );
+		var hb = CurrentGridWorld.GetHeightFromWorld( LocalToWorld( new Vector2( xe, ye ) ) );
+		return (hb - ha) <= 0.5;
+	}	
 }
-*/
+

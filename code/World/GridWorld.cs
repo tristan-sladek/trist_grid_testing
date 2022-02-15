@@ -9,7 +9,7 @@ public partial class GridWorld
 	public const int CHUNK_SIZE_SQUARED = 256;
 	Dictionary<string, List<Tile>> ChunkMap = new();
 	Dictionary<string, ChunkEntity> TileChunkMap = new();
-	public static Vector2 WorldToGrid(Vector3 world)
+	public static Vector2 WorldToGrid(Vector3 world )
 	{
 		return world.SnapToGrid( GRID_SCALE ) / GRID_SCALE;
 	}
@@ -19,7 +19,13 @@ public partial class GridWorld
 	}
 	public static Vector4 GridToChunk(Vector2 grid ) // x y chunkx chunky
 	{
-		return new Vector4(grid.x % CHUNK_SIZE , grid.y % CHUNK_SIZE , (int)(grid.x / CHUNK_SIZE), (int)(grid.y / CHUNK_SIZE) );
+		var x = (grid.x) % CHUNK_SIZE;
+		var y = (grid.y) % CHUNK_SIZE;
+		x = Math.Abs(x >= 0 ? x : CHUNK_SIZE + x);
+		y = Math.Abs(y >= 0 ? y : CHUNK_SIZE + y);
+		var cx = (grid.x / CHUNK_SIZE).SnapToGrid( 1 );
+		var cy = (grid.y / CHUNK_SIZE).SnapToGrid( 1 );
+		return new Vector4( x, y, cx, cy );
 	}
 	public static Vector2 ChunkToGrid( Vector4 chunk )
 	{
@@ -32,7 +38,7 @@ public partial class GridWorld
 			var TileChunk = new ChunkEntity();
 			TileChunk.ChunkX = cx;
 			TileChunk.ChunkY = cy;
-			TileChunk.Position = new Vector3( cx * GRID_SCALE * CHUNK_SIZE, cy * GRID_SCALE * CHUNK_SIZE, 1 );
+			TileChunk.Position = new Vector3( cx * GRID_SCALE * CHUNK_SIZE - GRID_SCALE / 2, cy * GRID_SCALE * CHUNK_SIZE - GRID_SCALE / 2, 1 );
 			TileChunk.SetChunkMDL( new MeshBuilder().Build( this, cx, cy ) );
 			TileChunkMap.Add( "X" + cx + "Y" + cy, TileChunk );
 			return TileChunk;
@@ -45,9 +51,26 @@ public partial class GridWorld
 		var b = new int[CHUNK_SIZE, CHUNK_SIZE];
 		List<Tile> TileChunk = new();
 
+		/*
 		for ( int x = 0; x < CHUNK_SIZE; x++ )
 			for ( int y = 0; y < CHUNK_SIZE; y++ )
 				b[x, y] = Rand.Int( 0, 2 );
+		*/
+		if ( cx == 0 && cy == 0 )
+		{
+			b[0, 0] = 1;
+			b[2, 0] = 2;
+			b[0, 2] = 3;
+		}
+		
+		if( cx == -1 && cy == -1 )
+		{
+			b[0, 0] = 1;
+			b[2, 0] = 2;
+			b[0, 2] = 3;
+		}
+
+
 
 		// Load Heightmap		
 		for ( int y = 0; y < CHUNK_SIZE; y++ )
@@ -76,26 +99,26 @@ public partial class GridWorld
 		int y = (int)chunk.y;
 		int cx = (int)chunk.z;
 		int cy = (int)chunk.w;
-
+		/*
+		while ( x < 0 ) { cx--; x += CHUNK_SIZE; }
+		while ( y < 0 ) { cy--; y += CHUNK_SIZE; }
+		while ( x >= CHUNK_SIZE ) { cx++; x -= CHUNK_SIZE; }
+		while ( y >= CHUNK_SIZE ) { cy++; y -= CHUNK_SIZE; }
+		*/
 		var TileChunk = GetChunk( cx, cy );
+		//Log.Info( x + " | " + y + " " + (x + y * CHUNK_SIZE) );
 		return TileChunk[x + y * CHUNK_SIZE];
 	}
-	public float GetHeightFromWorld( float x, float y )
+	public float GetHeightFromWorld( Vector3 world )
 	{
-		return GetHeightFromChunk( GridToChunk( WorldToGrid( new Vector2( x, y ) ) ) );
+		return GetHeightFromChunk( GridToChunk( WorldToGrid( world ) ) );
 	}
-	public float GetHeightFromGrid( int x, int y )
+	public float GetHeightFromGrid( Vector2 v1 )
 	{
-		return GetHeightFromChunk( GridToChunk( new Vector2( x, y ) ) );
+		return GetHeightFromChunk( GridToChunk( v1 ) );
 	}
 	public float GetHeightFromChunk( Vector4 chunk)
 	{
 		return GetTile( chunk ).Height;
-	}
-	public bool GetCanWalkAtoBGrid( int ax, int ay, int bx, int by )
-	{
-		var ha = GetHeightFromGrid( ax, ay );
-		var hb = GetHeightFromGrid( bx, by );
-		return (hb - ha) <= 0.5;
 	}
 }

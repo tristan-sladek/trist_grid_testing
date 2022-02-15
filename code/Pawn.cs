@@ -20,9 +20,7 @@ public partial class Pawn : ModelEntity
 		if ( IsServer && Input.Pressed( InputButton.Jump ) )
 		{
 			
-			CurrentGame.CurrentGridWorld.GetTileChunk( cx % 7 - 3, cx / 7 - 3 );
-				
-					
+			CurrentGame.CurrentGridWorld.GetTileChunk( cx % 7 - 3, cx / 7 - 3 );					
 			cx++;
 		}
 		
@@ -35,6 +33,25 @@ public partial class Pawn : ModelEntity
 
 			var hit = GridWorld.WorldToGrid( tr.Value );
 			WishPos = hit;
+		}
+		if ( IsServer && Input.Pressed( InputButton.Slot3 ) )
+		{
+			Log.Info( Position );
+			Log.Info( GridWorld.GridToWorld( GridWorld.WorldToGrid( Position ) ) );
+			Log.Info( GridWorld.WorldToGrid( Position ) );
+			Log.Info( "---" );
+			var p = new Pathfind(CurrentGame.CurrentGridWorld).FromPosition( Position );
+			Log.Info( p.WorldToLocal( Position ) );
+			Log.Info( p.LocalToWorld( p.WorldToLocal( Position*2 ) ) );
+			Log.Info( "---" );
+			Log.Info( GridWorld.GridToChunk( GridWorld.WorldToGrid( Position ) ) );
+			Log.Info( CurrentGame.CurrentGridWorld.GetHeightFromWorld( Position ) );
+
+
+		}
+		if (IsServer && Input.Pressed(InputButton.Slot4))
+		{
+			Position = Vector3.Zero.WithX( GridWorld.GRID_SCALE / 2 ).WithY( GridWorld.GRID_SCALE / 2 );
 		}
 
 		if ( !IsServer ) return;
@@ -62,36 +79,36 @@ public partial class Pawn : ModelEntity
 			}
 		}
 		
-		Position = Position.WithZ( CurrentGame.CurrentGridWorld.GetHeightFromWorld(Position.x, Position.y) );
+		Position = Position.WithZ( CurrentGame.CurrentGridWorld.GetHeightFromWorld(Position) * GridWorld.GRID_SCALE );		
 		base.Simulate( cl );
 	}
 	private void PathfindToWish(Vector2 PosOnGrid)
 	{
-		/*
 		var p = new Pathfind( CurrentGame.CurrentGridWorld ).FromPosition( PosOnGrid ).ToPosition( WishPos ).Path(63);
 		
 		if(!p.CanPathfind) { WishPos = PosOnGrid; return; }
 
 		CurDestPos = GridWorld.GridToWorld( (p.NextPos + PosOnGrid).SnapToGrid( 1 ) );
-		*/
+		
 	}	
 	public override void FrameSimulate( Client cl )
 	{
-		
-		
+				
 		var GS = GridWorld.GRID_SCALE;
-		var gridPlane = new Plane( Position.WithZ( 0 ), Vector3.Up );
+		var gridPlane = new Plane( Position.WithZ(2), Vector3.Up );
+		var GB = new Vector3( GS, GS, 0);
+		GB /= 2;
 
-		if ( (Local.Hud as HUD).MouseEnabled )
+		//if ( (Local.Hud as HUD).MouseEnabled )
 		{
 			var tr = gridPlane.Trace( Input.Cursor );
 			if ( tr == null ) return;
-			var hit = tr.Value.SnapToGrid( GS );
+			var hit = (tr.Value + GB / 2).SnapToGrid( GS );
 
 			//hit.z = WorldEntity.GetHeightFromWorld( hit.x, hit.y ) * ChunkEntity.GRID_SCALE;
 			hit.z += 2;
-			DebugOverlay.Box( hit, hit, Color.Yellow, 0, false );
-			DebugOverlay.Box( hit.WithZ(2), hit.WithZ( 2 ), Color.Yellow, 0, false );
+			DebugOverlay.Box( hit + GB, hit - GB, Color.Yellow, 0, false );
+			//DebugOverlay.Box( hit.WithZ(2), hit.WithZ( 2 ), Color.Yellow, 0, false );
 		}
 		if ( WishPos != GridWorld.WorldToGrid(Position) )
 		{
