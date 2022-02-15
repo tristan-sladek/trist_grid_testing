@@ -7,14 +7,15 @@ internal class PathNode
 	public PathNode( int x, int y) { X = x; Y = y; }
 	public PathNode( float x, float y) { X = (int)x; Y = (int)y; }
 }
+/*
 public partial class Pathfind
 {
-	WorldEntity WorldEntity { get; set; }
+	ChunkEntity WorldEntity { get; set; }
 	public bool CanPathfind { get; set; }
 	public Vector3 NextPos { get; set; } = Vector3.Zero;
 	private Vector3 Start { get; set; }
 	private Vector3 End { get; set; }
-	public Pathfind( WorldEntity w)
+	public Pathfind( ChunkEntity w)
 	{
 		WorldEntity = w;
 	}
@@ -22,7 +23,7 @@ public partial class Pathfind
 	{
 		if(!OnGrid)
 		{
-			InStart /= WorldEntity.GRID_SCALE;
+			InStart /= ChunkEntity.GRID_SCALE;
 			Start = InStart;
 		}
 		else Start = InStart;
@@ -33,7 +34,7 @@ public partial class Pathfind
 	{
 		if ( !OnGrid )
 		{
-			InEnd /= WorldEntity.GRID_SCALE;
+			InEnd /= ChunkEntity.GRID_SCALE;
 			End = InEnd;
 		}
 		else End = InEnd;
@@ -224,10 +225,11 @@ public partial class Pathfind
 	{
 		var v1 = LocalToMap( new Vector3( x1, y1 ) );
 		var v2 = LocalToMap( new Vector3 ( x2, y2 ) );
-		int bx = (int)v1.x + WorldEntity.radius;
-		int by = (int)v1.y + WorldEntity.radius;
-		int ex = (int)v2.x + WorldEntity.radius;
-		int ey = (int)v2.y + WorldEntity.radius;
-		return WorldEntity.CanWalkTo( bx, by, ex, ey );
+		int bx = (int)v1.x + ChunkEntity.ChunkSize;
+		int by = (int)v1.y + ChunkEntity.ChunkSize;
+		int ex = (int)v2.x + ChunkEntity.ChunkSize;
+		int ey = (int)v2.y + ChunkEntity.ChunkSize;
+		return WorldEntity.CanWalkAtoB( bx, by, ex, ey );
 	}
 }
+*/

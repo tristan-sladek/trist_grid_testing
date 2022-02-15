@@ -36,8 +36,8 @@ public class HoverCamera : Camera
 		if ( input.Down(InputButton.Attack2) )
 			LookInput += input.AnalogLook.WithRoll( 0 );
 
-		if ( input.Pressed( InputButton.Slot1 ) ) BasePosition = BasePosition.WithZ( BasePosition.z + WorldEntity.GRID_SCALE * MoveMult );
-		if ( input.Pressed( InputButton.Slot2 ) ) BasePosition = BasePosition.WithZ( BasePosition.z - WorldEntity.GRID_SCALE * MoveMult );
+		if ( input.Pressed( InputButton.Slot1 ) ) BasePosition = BasePosition.WithZ( BasePosition.z + GridWorld.GRID_SCALE * MoveMult );
+		if ( input.Pressed( InputButton.Slot2 ) ) BasePosition = BasePosition.WithZ( BasePosition.z - GridWorld.GRID_SCALE * MoveMult );
 
 		CamDistance -= input.MouseWheel * 10;
 		CamDistance = CamDistance.Clamp( MIN_CAM, MAX_CAM );

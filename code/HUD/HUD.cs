@@ -14,7 +14,7 @@ public partial class HUD : RootPanel
 			{
 				SetClass( "accept-input", value );
 				Style.PointerEvents = value ? "visible" : "none";
-				Style.Dirty();
+				Style.Dirty();				
 			}
 			_mouseEnabled = value;
 		}

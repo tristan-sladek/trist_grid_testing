@@ -4,7 +4,7 @@ public partial class Game : Sandbox.Game
 {
 	public HoverCamera HoverCamera { get; set; } = new();
 	public HUD HUD { get; private set; }
-	[Net] public WorldEntity World { get; set; }
+	public GridWorld CurrentGridWorld { get; set; }
 	public Game()
 	{
 		if(IsClient)
@@ -14,20 +14,15 @@ public partial class Game : Sandbox.Game
 		}
 		if( IsServer)
 		{
-			if ( !World.IsValid() ) CreateWorldEntity();
+			CurrentGridWorld = new GridWorld();
+			Log.Info( CurrentGridWorld );
 		}		
-	}
-	public void CreateWorldEntity()
-	{
-		if ( World.IsValid() ) World.Delete();
-		World = new WorldEntity();
-		World.Position = new Vector3( 0, 0, 1 );
 	}
 	public override void ClientJoined( Client cl )
 	{
 		var pawn = new Pawn();
-		pawn.Game = this;
-		cl.Pawn = pawn;
+		pawn.CurrentGame = this;
+		cl.Pawn = pawn;		
 		cl.Camera = HoverCamera;
 		
 		base.ClientJoined( cl );
