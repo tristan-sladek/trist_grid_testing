@@ -29,16 +29,28 @@ public partial class Pawn : ModelEntity
 		}
 		if ( IsServer && Input.Pressed( InputButton.Slot3 ) )
 		{
-			Log.Info( Position );
-			Log.Info( GridWorld.GridToWorld( GridWorld.WorldToGrid( Position ) ) );
-			Log.Info( GridWorld.WorldToGrid( Position ) );
-			Log.Info( "---" );
-			Log.Info( GridWorld.GridToChunk( GridWorld.WorldToGrid( Position ) ) );
-			Log.Info( CurrentGame.CurrentGridWorld.GetHeightFromWorld( Position ) );
+			Log.Info( CurrentGame.CurrentGridWorld.WallBetweenWorld( Position, Position + new Vector3( GridWorld.GRID_SCALE, 0, 0 ) ) );
+			Log.Info( CurrentGame.CurrentGridWorld.WallBetweenWorld( Position, Position - new Vector3( GridWorld.GRID_SCALE, 0, 0 ) ) );
+			Log.Info( CurrentGame.CurrentGridWorld.WallBetweenWorld( Position, Position + new Vector3( 0, GridWorld.GRID_SCALE, 0 ) ) );
+			Log.Info( CurrentGame.CurrentGridWorld.WallBetweenWorld( Position, Position - new Vector3( 0, GridWorld.GRID_SCALE, 0 ) ) );
+
 		}
 		if (IsServer && Input.Pressed(InputButton.Slot4))
 		{
 			Position = Vector3.Zero;
+			WishPos = Position;
+			CurDestPos = Position;
+			Moving = false;
+		}
+		if ( IsServer && Input.Pressed( InputButton.Slot5 ) )
+		{
+			var GS = GridWorld.GRID_SCALE;
+			var GB = new Vector3( GS, GS, 0 );
+			GB /= 2;
+			var tr = gridPlane.Trace( Input.Cursor );
+			if ( tr == null ) return;
+			var hit = (tr.Value + GB / 2).SnapToGrid( GS );
+			Position = hit;
 			WishPos = Position;
 			CurDestPos = Position;
 			Moving = false;
@@ -84,7 +96,7 @@ public partial class Pawn : ModelEntity
 	}
 	private void PathfindToWish()
 	{
-		var p = new Pathfind( CurrentGame.CurrentGridWorld ).FromPosition( Position ).ToPosition( WishPos ).Path(63);
+		var p = new Pathfind( CurrentGame.CurrentGridWorld ).FromPosition( Position ).ToPosition( WishPos ).Path(3);
 		
 		if(!p.CanPathfind) { WishPos = Position; return; }
 

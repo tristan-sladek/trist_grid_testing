@@ -91,7 +91,7 @@ public partial class Pathfind
 			GenerateRoute();
 		}
 		
-		//PrintDepthTree();
+		PrintDepthTree();
 
 		return this;
 	}
@@ -120,25 +120,25 @@ public partial class Pathfind
 			int minY = y;
 			int minD = d;
 
-			if ( GetDSafe( x - 1, y ) < minD && LocalCanWalkTo(x - 1, y, x, y ) )
+			if ( GetDSafe( x - 1, y ) < minD && LocalCanWalkTo( x - 1, y, x, y ) && !LocalIsWallBetween( x - 1, y, x, y ) ) 
 			{
 				minD = GetDSafe( x - 1, y );
 				minX = x - 1;
 				minY = y;
 			}
-			if ( GetDSafe( x + 1, y ) < minD && LocalCanWalkTo( x + 1, y, x, y ) )
+			if ( GetDSafe( x + 1, y ) < minD && LocalCanWalkTo( x + 1, y, x, y ) && !LocalIsWallBetween( x + 1, y, x, y ) ) 
 			{
 				minD = GetDSafe( x + 1, y );
 				minX = x + 1;
 				minY = y;
 			}
-			if ( GetDSafe( x, y - 1 ) < minD && LocalCanWalkTo( x, y - 1, x, y ) )
+			if ( GetDSafe( x, y - 1 ) < minD && LocalCanWalkTo( x, y - 1, x, y ) && !LocalIsWallBetween( x, y - 1, x, y ) ) 
 			{
 				minD = GetDSafe( x, y - 1 );
 				minX = x;
 				minY = y - 1;
 			}
-			if ( GetDSafe( x, y + 1 ) < minD && LocalCanWalkTo( x, y + 1, x, y ) )
+			if ( GetDSafe( x, y + 1 ) < minD && LocalCanWalkTo( x, y + 1, x, y ) && !LocalIsWallBetween( x, y + 1, x, y ) ) 
 			{
 				minD = GetDSafe( x, y + 1 );
 				minX = x;
@@ -162,7 +162,7 @@ public partial class Pathfind
 
 		if ( v < 0 ) //-1, unvisited
 		{
-			if ( LocalCanWalkTo( lx , ly, x, y ) ) //Check if this is blocked via world ent
+			if ( !LocalIsWallBetween( lx, ly, x, y ) &&  LocalCanWalkTo( lx , ly, x, y ) ) //Check if this is blocked via world ent
 			{
 				Queue.Add( new PathNode( x , y ) );
 				localPathList[x , y] = ld + 1;
@@ -172,12 +172,12 @@ public partial class Pathfind
 				localPathList[x , y] = MaxDepth + 1; //MaxDepth + 1, farther than anything
 			}
 		}
-		else if ( v < ld && LocalCanWalkTo( lx, ly, x, y ) && LocalCanWalkTo( x, y, lx, ly ) ) //more efficient path found from prev stuff
+		else if ( !LocalIsWallBetween( lx, ly, x, y ) && v < ld && LocalCanWalkTo( lx, ly, x, y ) && LocalCanWalkTo( x, y, lx, ly ) ) //more efficient path found from prev stuff
 		{
 			ld = v + 1;
 			localPathList[lx, ly] = ld; //just update to make things smoother
 		}
-		else if( v == MaxDepth + 1 && LocalCanWalkTo( lx,ly,x,y) ) //marked as wall from one side, but I can walk to it.
+		else if( !LocalIsWallBetween( lx, ly, x, y ) && v == MaxDepth + 1 && LocalCanWalkTo( lx,ly,x,y)  ) //marked as wall from one side, but I can walk to it.
 		{
 			Queue.Insert(0, new PathNode( x, y ) );
 			localPathList[x, y] = ld + 1;
@@ -218,9 +218,17 @@ public partial class Pathfind
 	}
 	private bool LocalCanWalkTo(int xb, int yb, int xe, int ye)
 	{
-		var ha = CurrentGridWorld.GetHeightFromWorld( LocalToWorld( new Vector2( xb, yb ) ) );
-		var hb = CurrentGridWorld.GetHeightFromWorld( LocalToWorld( new Vector2( xe, ye ) ) );
-		return (hb - ha) <= 0.5;
-	}	
+		var v1 = LocalToWorld( new Vector2( xb, yb ));
+		var v2 = LocalToWorld( new Vector2( xe, ye ));
+		var ha = CurrentGridWorld.GetHeightFromWorld( v1 );
+		var hb = CurrentGridWorld.GetHeightFromWorld( v2 );
+		return ((hb - ha) <= 0.5);
+	}
+	private bool LocalIsWallBetween( int xb, int yb, int xe, int ye )
+	{
+		var v1 = LocalToWorld( new Vector2( xb, yb ) );
+		var v2 = LocalToWorld( new Vector2( xe, ye ) );
+		return CurrentGridWorld.WallBetweenWorld( v1, v2 );
+	}
 }
 
