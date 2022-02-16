@@ -47,8 +47,8 @@ public class MeshBuilder
 	private List<Vertex> HorizontalPass()
 	{
 		List<Vertex> hVerts = new();
-		for ( int y = -1; y < GridWorld.CHUNK_SIZE; y++)
-			for (int x = -1;x < GridWorld.CHUNK_SIZE; x++ )
+		for ( int y = 0; y < GridWorld.CHUNK_SIZE; y++)
+			for (int x = 0;x < GridWorld.CHUNK_SIZE; x++ )
 			{
 				var TA = getTile(x,y);
 				var TB = getTile(x + 1,y);
@@ -90,8 +90,8 @@ public class MeshBuilder
 	private List<Vertex> VerticalPass()
 	{
 		List<Vertex> vVerts = new();
-		for ( int y = -1; y < GridWorld.CHUNK_SIZE; y++ )
-			for ( int x = -1; x < GridWorld.CHUNK_SIZE; x++ )
+		for ( int y = 0; y < GridWorld.CHUNK_SIZE; y++ )
+			for ( int x = 0; x < GridWorld.CHUNK_SIZE; x++ )
 			{
 				var TA = getTile( x, y );
 				var TB = getTile( x, y + 1 );
