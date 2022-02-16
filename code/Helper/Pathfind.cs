@@ -47,7 +47,6 @@ public partial class Pathfind
 		
 		localStart = WorldToLocal( Start );
 		localEnd = WorldToLocal( End );
-		// Log.Info( "MAP: " + Start + " | " + End + " : LOCAL: " + localStart + " | " + localEnd );
 		if ( localStart == localEnd ) return this; //Don't even try to pathfind to self
 		
 		var localDist = (localEnd - localStart); 
@@ -104,18 +103,10 @@ public partial class Pathfind
 		int ex = (int)localStart.x;
 		int ey = (int)localStart.y;
 		int d = GetDSafe( x, y );
-		int s = 0;
-
 		while ( x != ex || y != ey )
 		{
 			Route.Add( new PathNode( x, y ) );
-			if ( ++s > MaxDepth )
-			{
-				CanPathfind = false;
-				//Log.Error( "Force Break! " + x + " | " + y ); PrintDepthTree();
-				break;
-			}
-
+			
 			int minX = x;
 			int minY = y;
 			int minD = d;
@@ -149,7 +140,6 @@ public partial class Pathfind
 			x = minX;
 			y = minY;
 		}
-		// Log.Info( "Path Found! " + s );
 		var LastPath = Route[Route.Count - 1];
 
 		NextPos = new Vector3( LastPath.X - localStart.x, LastPath.Y - localStart.y, 0 );

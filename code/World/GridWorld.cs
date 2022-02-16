@@ -112,14 +112,7 @@ public partial class GridWorld
 		int y = (int)chunk.y;
 		int cx = (int)chunk.z;
 		int cy = (int)chunk.w;
-		/*
-		while ( x < 0 ) { cx--; x += CHUNK_SIZE; }
-		while ( y < 0 ) { cy--; y += CHUNK_SIZE; }
-		while ( x >= CHUNK_SIZE ) { cx++; x -= CHUNK_SIZE; }
-		while ( y >= CHUNK_SIZE ) { cy++; y -= CHUNK_SIZE; }
-		*/
 		var ChunkMap = GetChunk( cx, cy );
-		//Log.Info( x + " | " + y + " " + (x + y * CHUNK_SIZE) );
 		return ChunkMap[x + y * CHUNK_SIZE];
 	}
 	public float GetHeightFromWorld( Vector3 world )
