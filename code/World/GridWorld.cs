@@ -63,12 +63,20 @@ public partial class GridWorld
 		if ( cx == 0 && cy == 0 )
 		{
 			b[0, 0].Height = 0.5f;
+			b[0, 0].Walls = 0b0101;
 			b[2, 0].Height = 1;
 			b[0, 2].Height = 1.5f;
 
 			b[4, 4].Walls = 0b1111;
 			b[5, 4].Walls = 0b1011;
 			b[6, 4].Walls = 0b1001;
+		}
+		if( cx == 1 && cy == 1)
+		{
+			var m = new MazeGen().GenerateMaze( 16 );
+			foreach( Tile t in m)
+				TileChunk.Add( t );
+			return TileChunk;
 		}
 				
 		var d = 3;
