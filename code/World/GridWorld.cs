@@ -136,26 +136,21 @@ public partial class GridWorld
 	}
 	public bool WallBetweenWorld(Vector3 v1, Vector3 v2)
 	{
-		var v1c = GridToChunk( WorldToGrid( v1 ) );
-		var v2c = GridToChunk( WorldToGrid( v2 ) );
-		var T1 = GetTile(v1c);
-		var T2 = GetTile(v2c);
-		//Log.Info( T1.Walls );
-		//Log.Info( T2.Walls );
-		if ( v2c.y > v1c.y ) // N
+		var T1 = GetTile( GridToChunk( WorldToGrid( v1 ) ) );
+		var T2 = GetTile( GridToChunk( WorldToGrid( v2 ) ) );
+		if ( v2.y > v1.y ) // N
 		{			
-			// T1 has north wall or T2 has south wall, ect..
 			return T1.NorthWall || T2.SouthWall;
 		}
-		if ( v1c.y > v2c.y ) // S
+		if ( v1.y > v2.y ) // S
 		{	
 			return T1.SouthWall || T2.NorthWall;
 		}
-		if ( v2c.x > v1c.x ) // E
+		if ( v2.x > v1.x ) // E
 		{	
 			return T1.EastWall || T2.WestWall;
 		}
-		if ( v1c.x > v2c.x ) // W
+		if ( v1.x > v2.x ) // W
 		{	
 			return T1.WestWall || T2.EastWall;
 		}

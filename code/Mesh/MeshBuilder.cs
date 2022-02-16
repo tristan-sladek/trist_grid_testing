@@ -269,14 +269,14 @@ public class MeshBuilder
 			for ( int x = 0; x < GridWorld.CHUNK_SIZE; x++ )
 			{
 				var T = getTile( x, y );
-				bool N = (T.Walls & 0b1000) > 0;
-				bool S = (T.Walls & 0b0100) > 0;
-				bool E = (T.Walls & 0b0010) > 0;
-				bool W = (T.Walls & 0b0001) > 0;
-				bool NW = (getTile( x, y + 1 ).Walls & 0b0100) > 0; // north tile has south wall, ect..
-				bool SW = (getTile( x, y - 1 ).Walls & 0b1000) > 0;
-				bool EW = (getTile( x + 1, y ).Walls & 0b0001) > 0;
-				bool WW = (getTile( x - 1, y ).Walls & 0b1010) > 0;
+				bool N = T.NorthWall;
+				bool S = T.SouthWall;
+				bool E = T.EastWall;
+				bool W = T.WestWall;
+				bool NW = getTile( x, y + 1 ).SouthWall; // north tile has south wall, ect..
+				bool SW = getTile( x, y - 1 ).NorthWall;
+				bool EW = getTile( x + 1, y ).WestWall;
+				bool WW = getTile( x - 1, y ).EastWall;
 
 				List<Vertex> verts;
 
