@@ -50,8 +50,19 @@ public partial class Pawn : ModelEntity
 		}
 
 		if ( !IsServer ) return;
-		
-		if ( Moving )
+
+		{ // scoped to make this cleaner
+			var pc = GridWorld.GridToChunk( GridWorld.WorldToGrid( Position ) );
+			int cx = (int)pc.z;
+			int cy = (int)pc.w;
+			for ( int x = -1; x < 2; x++ )
+				for ( int y = -1; y < 2; y++ )
+				{
+					CurrentGame.CurrentGridWorld.GetTileChunk( cx + x, cy + y);
+				}
+		}
+
+				if ( Moving )
 		{
 			Position = Position.WithZ( 0 );
 			if ( Position.Distance( CurDestPos.WithZ(0) ) < 0.1 * GridWorld.GRID_SCALE )

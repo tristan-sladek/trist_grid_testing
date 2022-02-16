@@ -32,5 +32,11 @@ public partial class Game : Sandbox.Game
 		HUD.MouseEnabled = !input.Down( InputButton.Attack2 );
 		base.BuildInput( input );
 	}
+	public override void Simulate( Client cl )
+	{
+		if(IsServer)
+			CurrentGridWorld.Simulate();
+		base.Simulate( cl );
+	}
 }
 

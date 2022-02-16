@@ -5,7 +5,7 @@ public partial class ChunkEntity : ModelEntity
 {
 	public int ChunkX { get; set; }
 	public int ChunkY { get; set; }
-	
+
 	[ClientRpc]
 	public void SetChunkMDL(Model m)
 	{
