@@ -96,7 +96,7 @@ public partial class Pawn : ModelEntity
 	}
 	private void PathfindToWish()
 	{
-		var p = new Pathfind( CurrentGame.CurrentGridWorld ).FromPosition( Position ).ToPosition( WishPos ).Path(3);
+		var p = new Pathfind( CurrentGame.CurrentGridWorld ).FromPosition( Position ).ToPosition( WishPos ).Path(63);
 		
 		if(!p.CanPathfind) { WishPos = Position; return; }
 
