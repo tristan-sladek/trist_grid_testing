@@ -4,7 +4,7 @@ using System;
 public partial class Pawn : ModelEntity
 {
 	[Net] public Game CurrentGame { get; set; }
-	[Net] private Vector2 WishPos { get; set; }
+	[Net] private Vector3 WishPos { get; set; }
 	private bool Moving;	
 	private Vector3 CurDestPos;
 	public override void Spawn()
@@ -30,9 +30,7 @@ public partial class Pawn : ModelEntity
 		{
 			var tr = gridPlane.Trace( Input.Cursor );
 			if ( tr == null ) return;
-
-			var hit = GridWorld.WorldToGrid( tr.Value );
-			WishPos = hit;
+			WishPos = tr.Value;
 		}
 		if ( IsServer && Input.Pressed( InputButton.Slot3 ) )
 		{
@@ -42,7 +40,8 @@ public partial class Pawn : ModelEntity
 			Log.Info( "---" );
 			var p = new Pathfind(CurrentGame.CurrentGridWorld).FromPosition( Position );
 			Log.Info( p.WorldToLocal( Position ) );
-			Log.Info( p.LocalToWorld( p.WorldToLocal( Position*2 ) ) );
+			Log.Info( p.LocalToWorld( p.WorldToLocal( Position ) ) );
+			Log.Info( p.LocalToWorld( p.WorldToLocal( Position ) + new Vector2(1,0) ) );
 			Log.Info( "---" );
 			Log.Info( GridWorld.GridToChunk( GridWorld.WorldToGrid( Position ) ) );
 			Log.Info( CurrentGame.CurrentGridWorld.GetHeightFromWorld( Position ) );
@@ -59,7 +58,7 @@ public partial class Pawn : ModelEntity
 		if ( Moving )
 		{
 			Position = Position.WithZ( 0 );
-			if ( Position.Distance( CurDestPos ) < 0.1 * GridWorld.GRID_SCALE )
+			if ( Position.Distance( CurDestPos.WithZ(0) ) < 0.1 * GridWorld.GRID_SCALE )
 			{
 				Position = CurDestPos;
 				Moving = false;
@@ -71,10 +70,9 @@ public partial class Pawn : ModelEntity
 		}
 		else
 		{
-			var PosOnGrid = GridWorld.WorldToGrid( Position );
-			if ( PosOnGrid != WishPos )
+			if ( Position != WishPos )
 			{
-				PathfindToWish(PosOnGrid);
+				PathfindToWish();
 				Moving = true;
 			}
 		}
@@ -82,13 +80,13 @@ public partial class Pawn : ModelEntity
 		Position = Position.WithZ( CurrentGame.CurrentGridWorld.GetHeightFromWorld(Position) * GridWorld.GRID_SCALE );		
 		base.Simulate( cl );
 	}
-	private void PathfindToWish(Vector2 PosOnGrid)
+	private void PathfindToWish()
 	{
-		var p = new Pathfind( CurrentGame.CurrentGridWorld ).FromPosition( PosOnGrid ).ToPosition( WishPos ).Path(63);
+		var p = new Pathfind( CurrentGame.CurrentGridWorld ).FromPosition( Position ).ToPosition( WishPos ).Path(4);
 		
-		if(!p.CanPathfind) { WishPos = PosOnGrid; return; }
+		if(!p.CanPathfind) { WishPos = Position; return; }
 
-		CurDestPos = GridWorld.GridToWorld( (p.NextPos + PosOnGrid).SnapToGrid( 1 ) );
+		CurDestPos = (Position + GridWorld.GridToWorld( (p.NextPos) ).SnapToGrid( GridWorld.GRID_SCALE ));
 		
 	}	
 	public override void FrameSimulate( Client cl )
@@ -110,9 +108,9 @@ public partial class Pawn : ModelEntity
 			DebugOverlay.Box( hit + GB, hit - GB, Color.Yellow, 0, false );
 			//DebugOverlay.Box( hit.WithZ(2), hit.WithZ( 2 ), Color.Yellow, 0, false );
 		}
-		if ( WishPos != GridWorld.WorldToGrid(Position) )
+		if ( WishPos != Position )
 		{
-			var W_WishPos = GridWorld.GridToWorld( WishPos );
+			var W_WishPos = WishPos;
 			//W_WishPos.z = CurrentGame.CurrentGridWorld.GetHeightFromGrid( (int)WishPos.x, (int)WishPos.y ) * GridWorld.GRID_SCALE;
 			W_WishPos.z += 2;
 			DebugOverlay.Box( W_WishPos, W_WishPos, Color.Red, 0, true );

@@ -19,25 +19,15 @@ public partial class Pathfind
 	{
 		CurrentGridWorld = currentGridWorld;
 	}
-	public Pathfind FromPosition(Vector3 InStart, bool OnGrid = true )
+	public Pathfind FromPosition(Vector3 InStart )
 	{
-		if(!OnGrid)
-		{
-			InStart /= GridWorld.GRID_SCALE;
-			Start = InStart;
-		}
-		else Start = InStart;
+		Start = InStart;
 		Start.SnapToGrid( 1 ); //make sure everything is clean
 		return this;
 	}
-	public Pathfind ToPosition(Vector3 InEnd, bool OnGrid = true )
+	public Pathfind ToPosition(Vector3 InEnd )
 	{
-		if ( !OnGrid )
-		{
-			InEnd /= GridWorld.GRID_SCALE;
-			End = InEnd;
-		}
-		else End = InEnd;
+		End = InEnd;
 		End.SnapToGrid( 1 ); //make sure everything is clean
 		return this;
 	}
@@ -57,7 +47,6 @@ public partial class Pathfind
 		
 		localStart = WorldToLocal( Start );
 		localEnd = WorldToLocal( End );
-		
 		// Log.Info( "MAP: " + Start + " | " + End + " : LOCAL: " + localStart + " | " + localEnd );
 		if ( localStart == localEnd ) return this; //Don't even try to pathfind to self
 		
@@ -102,7 +91,7 @@ public partial class Pathfind
 			GenerateRoute();
 		}
 		
-		//PrintDepthTree();
+		PrintDepthTree();
 
 		return this;
 	}
@@ -202,24 +191,30 @@ public partial class Pathfind
 	}
 	private void PrintDepthTree()
 	{
-			for(int y = 0; y < MaxDepth; y++)
+		Log.Info( "-----------------------------------------------" );
+		for(int y = MaxDepth - 1; y >= 0 ; y--)
 		{
 			string s = ("Y" + y + ": ").PadRight(5);
 			for ( int x = 0; x < MaxDepth; x++ )
 			{
 				if ( x > 0 ) s += " | ";
-				s += (localPathList[x, y] >= 0) ? localPathList[x, y].ToString().PadLeft(2) : "  "; 
+				if ( localStart.x == x && localStart.y == y )
+					s += " S";
+				else if ( localEnd.x == x && localEnd.y == y )
+					s += " E";
+				else
+					s += (localPathList[x, y] >= 0) ? localPathList[x, y].ToString().PadLeft(2) : "  ";
 			}
 			Log.Info( s );
 		}
 	}
-	public Vector3 LocalToWorld( Vector3 local )
+	public Vector3 LocalToWorld( Vector2 local )
 	{
-		return local + Start - new Vector3( Depth , Depth , 0 );
+		return GridWorld.GridToWorld( GridWorld.WorldToGrid( Start ) + local - new Vector2( Depth, Depth ) );
 	}
-	public Vector3 WorldToLocal( Vector3 map)
+	public Vector2 WorldToLocal( Vector3 world )
 	{
-		return map - Start + new Vector3( Depth  , Depth , 0 );
+		return GridWorld.WorldToGrid( world - Start ) + new Vector2( Depth  , Depth);
 	}
 	private bool LocalCanWalkTo(int xb, int yb, int xe, int ye)
 	{
