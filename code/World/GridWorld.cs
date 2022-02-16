@@ -40,36 +40,42 @@ public partial class GridWorld
 			TileChunk.ChunkY = cy;
 			TileChunk.Position = new Vector3( cx * GRID_SCALE * CHUNK_SIZE - GRID_SCALE / 2, cy * GRID_SCALE * CHUNK_SIZE - GRID_SCALE / 2, 1 );
 			TileChunkMap.Add( "X" + cx + "Y" + cy, TileChunk );
-			ModelQueue.Add( TileChunk );
+			QueueTileChunk( TileChunk );			
 			return TileChunk;
 		}
 		return TileChunkMap["X" + cx + "Y" + cy];
 	}
 	public List<Tile> GenerateChunk( int cx, int cy )
 	{
-		var b = new int[CHUNK_SIZE, CHUNK_SIZE];
+		var b = new Tile[CHUNK_SIZE, CHUNK_SIZE];
 		List<Tile> TileChunk = new();
 
+		for ( int y = 0; y < CHUNK_SIZE; y++ )
+			for ( int x = 0; x < CHUNK_SIZE; x++ )
+				b[x, y] = new();
 
-		/*
-		for ( int x = 0; x < CHUNK_SIZE; x++ )
-			for ( int y = 0; y < CHUNK_SIZE; y++ )
-				b[x, y] = Rand.Int( 0, 2 );
-		*/
+				/*
+				for ( int x = 0; x < CHUNK_SIZE; x++ )
+					for ( int y = 0; y < CHUNK_SIZE; y++ )
+						b[x, y] = Rand.Int( 0, 2 );
+				*/
 
 		if ( cx == 0 && cy == 0 )
 		{
-			b[0, 0] = 1;
-			b[2, 0] = 2;
-			b[0, 2] = 3;
-		}
+			b[0, 0].Height = 0.5f;
+			b[2, 0].Height = 1;
+			b[0, 2].Height = 1.5f;
 
-		if ( cx == -1 && cy == -1 )
-		{
-			b[0, 0] = 1;
-			b[2, 0] = 2;
-			b[0, 2] = 3;
+			b[4, 4].Walls = 0b1111;
+			b[5, 4].Walls = 0b1011;
+			b[6, 4].Walls = 0b1001;
 		}
+				
+		var d = 3;
+		if(cx > d || cy > d || cx < -d || cy < -d)
+			for ( int x = 0; x < CHUNK_SIZE; x++ )
+				for ( int y = 0; y < CHUNK_SIZE; y++ )
+					b[x, y].Height = 30;
 
 
 
@@ -77,9 +83,7 @@ public partial class GridWorld
 		for ( int y = 0; y < CHUNK_SIZE; y++ )
 			for ( int x = 0; x < CHUNK_SIZE; x++ )
 			{
-				var t = new Tile();
-				t.Height = (float)(b[x, y]) / 2f;
-				TileChunk.Add( t );
+				TileChunk.Add( b[x,y] );
 			}
 		return TileChunk;
 	}
@@ -124,6 +128,10 @@ public partial class GridWorld
 	}
 	List<ChunkEntity> ModelQueue = new();
 	long lastGen = 0;
+	public void QueueTileChunk(ChunkEntity TileChunk)
+	{
+		ModelQueue.Add( TileChunk );
+	}
 	public void Simulate()
 	{
 		long currGen = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;

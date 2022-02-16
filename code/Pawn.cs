@@ -14,18 +14,13 @@ public partial class Pawn : ModelEntity
 
 		base.Spawn();
 	}
-	int cx = 0;
 	public override void Simulate( Client cl )
 	{
+		var gridPlane = new Plane( Vector3.Zero, Vector3.Up );
 		if ( IsServer && Input.Pressed( InputButton.Jump ) )
 		{
-			
-			CurrentGame.CurrentGridWorld.GetTileChunk( cx % 7 - 3, cx / 7 - 3 );					
-			cx++;
+			CurrentGame.CurrentGridWorld.QueueTileChunk( CurrentGame.CurrentGridWorld.GetTileChunk( 0, 0 ) );
 		}
-		
-		var gridPlane = new Plane( Vector3.Zero, Vector3.Up );
-
 		if ( IsServer && Input.Pressed( InputButton.Attack1 ) )
 		{
 			var tr = gridPlane.Trace( Input.Cursor );
@@ -72,7 +67,7 @@ public partial class Pawn : ModelEntity
 			}
 			else
 			{
-				Position = Position.LerpTo( CurDestPos, Time.Delta * 10 );
+				Position = Position.LerpTo( CurDestPos, Time.Delta * 10 * (Input.Down( InputButton.Run ) ? 3 : 1) );
 			}			
 		}
 		else
