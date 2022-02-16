@@ -23,8 +23,8 @@ public partial class GridWorld
 		var y = (grid.y) % CHUNK_SIZE;
 		x = Math.Abs(x >= 0 ? x : CHUNK_SIZE + x);
 		y = Math.Abs(y >= 0 ? y : CHUNK_SIZE + y);
-		var cx = (grid.x / CHUNK_SIZE).SnapToGrid( 1 );
-		var cy = (grid.y / CHUNK_SIZE).SnapToGrid( 1 );
+		var cx = (grid.x / CHUNK_SIZE).Floor();
+		var cy = (grid.y / CHUNK_SIZE).Floor();
 		return new Vector4( x, y, cx, cy );
 	}
 	public static Vector2 ChunkToGrid( Vector4 chunk )
@@ -51,11 +51,11 @@ public partial class GridWorld
 		var b = new int[CHUNK_SIZE, CHUNK_SIZE];
 		List<Tile> TileChunk = new();
 
-		/*
+		
 		for ( int x = 0; x < CHUNK_SIZE; x++ )
 			for ( int y = 0; y < CHUNK_SIZE; y++ )
 				b[x, y] = Rand.Int( 0, 2 );
-		*/
+		
 		if ( cx == 0 && cy == 0 )
 		{
 			b[0, 0] = 1;

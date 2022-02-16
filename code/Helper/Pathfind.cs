@@ -91,7 +91,7 @@ public partial class Pathfind
 			GenerateRoute();
 		}
 		
-		PrintDepthTree();
+		//PrintDepthTree();
 
 		return this;
 	}

@@ -38,19 +38,15 @@ public partial class Pawn : ModelEntity
 			Log.Info( GridWorld.GridToWorld( GridWorld.WorldToGrid( Position ) ) );
 			Log.Info( GridWorld.WorldToGrid( Position ) );
 			Log.Info( "---" );
-			var p = new Pathfind(CurrentGame.CurrentGridWorld).FromPosition( Position );
-			Log.Info( p.WorldToLocal( Position ) );
-			Log.Info( p.LocalToWorld( p.WorldToLocal( Position ) ) );
-			Log.Info( p.LocalToWorld( p.WorldToLocal( Position ) + new Vector2(1,0) ) );
-			Log.Info( "---" );
 			Log.Info( GridWorld.GridToChunk( GridWorld.WorldToGrid( Position ) ) );
 			Log.Info( CurrentGame.CurrentGridWorld.GetHeightFromWorld( Position ) );
-
-
 		}
 		if (IsServer && Input.Pressed(InputButton.Slot4))
 		{
-			Position = Vector3.Zero.WithX( GridWorld.GRID_SCALE / 2 ).WithY( GridWorld.GRID_SCALE / 2 );
+			Position = Vector3.Zero;
+			WishPos = Position;
+			CurDestPos = Position;
+			Moving = false;
 		}
 
 		if ( !IsServer ) return;
@@ -82,7 +78,7 @@ public partial class Pawn : ModelEntity
 	}
 	private void PathfindToWish()
 	{
-		var p = new Pathfind( CurrentGame.CurrentGridWorld ).FromPosition( Position ).ToPosition( WishPos ).Path(4);
+		var p = new Pathfind( CurrentGame.CurrentGridWorld ).FromPosition( Position ).ToPosition( WishPos ).Path(63);
 		
 		if(!p.CanPathfind) { WishPos = Position; return; }
 
