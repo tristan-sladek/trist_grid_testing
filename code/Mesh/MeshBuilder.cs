@@ -1,4 +1,4 @@
-﻿using Sandbox;
+using Sandbox;
 using System;
 using System.Collections.Generic;
 public class MeshBuilder
@@ -170,8 +170,7 @@ public class MeshBuilder
 				c += off;
 				d += off;
 
-
-				verts = GetQuad( a, b, c, d );//, (x2 - x1) / GS, 1, (x1 / GS - x) );
+				verts = GetQuad( a, b, c, d, (x2 - x1) / GS, 1, (x1 + HGS) / GS );//, (x2 - x1) / GS, 1, (x1 / GS - x) );
 				foreach ( var v in verts )
 					wVerts.Add( v );
 			}			
@@ -192,7 +191,7 @@ public class MeshBuilder
 				c += off;
 				d += off;
 
-				verts = GetQuad( a, b, c, d , (x2 - x1) / GS, SS, (x1 + HGS) );
+				verts = GetQuad( a, b, c, d , (x2 - x1) / GS, SS, (x1 + HGS) / GS );
 				
 				
 				foreach ( var v in verts )
@@ -219,7 +218,7 @@ public class MeshBuilder
 					wVerts.Add( v );
 			}
 
-			if( !EW )
+			if( !EW & !E )
 			{
 				float x1 = HGS;
 				float y1 = HGS - SS * GS;
@@ -237,7 +236,7 @@ public class MeshBuilder
 				foreach ( var v in verts )
 					wVerts.Add( v );
 			}
-			if ( !WW )
+			if ( !WW & !W )
 			{
 				float x1 = -HGS;
 				float y1 = HGS;
@@ -285,7 +284,7 @@ public class MeshBuilder
 					verts = WallSeg( x, y, T.Height, N, E, W, NW, EW, WW, 0 );
 					foreach ( var v in verts )
 						wVerts.Add( v );
-				}
+				}				
 				if ( S )
 				{
 					verts = WallSeg( x, y, T.Height, S, W, E, SW, WW, EW, 1 );
@@ -304,6 +303,7 @@ public class MeshBuilder
 					foreach ( var v in verts )
 						wVerts.Add( v );
 				}
+				
 			}
 
 		return wVerts;
