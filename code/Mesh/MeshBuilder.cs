@@ -365,7 +365,7 @@ public class MeshBuilder
 					wVerts.Add( v );
 			}
 
-			if ( !fE & !e & !(cNEW & !cNES) ) // East Cap
+			if ( !fE & !e & !cNES & !cNEW ) // East Cap
 			{
 				float x1 = HGS;
 				float y1 = HGS - SS * GS;
@@ -383,7 +383,7 @@ public class MeshBuilder
 				foreach ( var v in verts )
 					wVerts.Add( v );
 			}
-			if ( !fW & !w & !( cNWE & !cNWS ) ) // West Cap
+			if ( !fW & !w & !cNWE & !cNWS ) // West Cap
 			{
 				float x1 = -HGS;
 				float y1 = HGS;
