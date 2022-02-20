@@ -10,14 +10,16 @@ public class MeshBuilder
 		Vector3 N = (v1 - v2).Cross( v1 - v3 ) * -1;
 		Vector3 T = (v2 - v1).Normal * -1;
 		
-		Vertex a = new Vertex( v1, N, T, new Vector2( 0 + ox, h + oy ) );
-		a.Color = Color.Blue;
-		Vertex b = new Vertex( v2, N, T, new Vector2( 0 + ox, 0 + oy ) );
-		b.Color = Color.Red;
-		Vertex c = new Vertex( v3, N, T, new Vector2( w + ox, h + oy ) );
-		c.Color = Color.Green;
+		Vertex a = new Vertex( v1, N, T, new Vector2( 0 + ox, h + oy ) );		
+		Vertex b = new Vertex( v2, N, T, new Vector2( 0 + ox, 0 + oy ) );		
+		Vertex c = new Vertex( v3, N, T, new Vector2( w + ox, h + oy ) );		
 		Vertex d = new Vertex( v4, N, T, new Vector2( w + ox, 0 - oy ) );
-		d.Color = Color.White;
+
+		var col = Color.FromBytes(0,0,0);
+		a.Color = col;
+		b.Color = col;
+		c.Color = col;
+		d.Color = col;
 
 		return new Vertex[]{ a, c, b, d, b, c };
 	}
@@ -336,11 +338,12 @@ public class MeshBuilder
 		var m2 = Material.Load( "materials/dev/dev_measuregeneric01.vmat" );
 		var m3 = Material.Load( "materials/dev/dev_measuregeneric01b.vmat" );
 		var m4 = Material.Load( "materials/dev/debug_wireframe.vmat" );
+		var m5 = Material.Load( "materials/vertex_lookup.vmat" );
 
 		return new ModelBuilder()
-			.AddMesh( CreateMesh( FloorPass(), m2 ) )
-			.AddMesh( CreateMesh( wall_verts, m3 ) )
-			.AddMesh( CreateMesh( WallPass(), m1 ) )
+			.AddMesh( CreateMesh( FloorPass(), m5 ) )
+			.AddMesh( CreateMesh( wall_verts, m5 ) )
+			.AddMesh( CreateMesh( WallPass(), m5 ) )
 			.Create();
 	}
 	private Mesh CreateMesh( List<Vertex> verts, Material mat)

@@ -31,7 +31,6 @@ public class MazeGen
 		Stack.Add( GetCell( 0, 0 ) );
 		while ( Stack.Count > 0 )
 		{
-			Log.Info( Stack.Count );
 			Cell Current = Stack[Stack.Count - 1];
 			Current.Visited = true;
 			Stack.RemoveAt( Stack.Count - 1 );
@@ -107,7 +106,6 @@ public class MazeGen
 	{
 		if(x >= 0 && y >= 0 && x < Size && y < Size)
 			return cells[x,y];
-		Log.Info( x + "," + y );
 		return null;
 	}
 	

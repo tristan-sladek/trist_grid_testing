@@ -67,9 +67,12 @@ public partial class GridWorld
 			b[2, 0].Height = 1;
 			b[0, 2].Height = 1.5f;
 
-			b[4, 4].Walls = 0b1111;
-			b[5, 4].Walls = 0b1011;
-			b[6, 4].Walls = 0b1001;
+			b[4, 4].Walls = 0b0111;
+			b[4, 5].Walls = 0b1001;
+			b[5, 5].Walls = 0b1100;
+			b[6, 5].Walls = 0b1010;
+			b[6, 4].Walls = 0b0110;
+			
 		}
 		if( cx == 1 && cy == 1)
 		{

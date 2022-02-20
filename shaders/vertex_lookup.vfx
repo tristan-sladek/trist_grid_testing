@@ -1,0 +1,109 @@
+//=========================================================================================================================
+// Optional
+//=========================================================================================================================
+HEADER
+{
+	CompileTargets = ( IS_SM_50 && ( PC || VULKAN ) );
+	Description = "look up a texture to do stuff with";
+    DevShader = true;
+}
+
+//=========================================================================================================================
+// Optional
+//=========================================================================================================================
+FEATURES
+{
+    #include "common/features.hlsl"
+}
+
+//=========================================================================================================================
+// Optional
+//=========================================================================================================================
+MODES
+{
+    VrForward();													// Indicates this shader will be used for main rendering
+    Depth( "vr_depth_only.vfx" ); 									// Shader that will be used for shadowing and depth prepass
+    ToolsVis( S_MODE_TOOLS_VIS ); 									// Ability to see in the editor
+    ToolsWireframe( "vr_tools_wireframe.vfx" ); 					// Allows for mat_wireframe to work
+	ToolsShadingComplexity( "vr_tools_shading_complexity.vfx" ); 	// Shows how expensive drawing is in debug view
+}
+
+//=========================================================================================================================
+COMMON
+{
+	#include "common/shared.hlsl"
+    //expose Gridsize to Material Doc.
+    int GridSize <Default(16);UiGroup( "TextureAtlas,10/90" );>;
+}
+
+//=========================================================================================================================
+
+struct VertexInput
+{
+	#include "common/vertexinput.hlsl"
+    //Convert this to a float2 once you get your own Pixel going.
+	float4 vColor : COLOR0 < Semantic( Color ); >;
+};
+
+//=========================================================================================================================
+
+struct PixelInput
+{
+	#include "common/pixelinput.hlsl"
+};
+
+//=========================================================================================================================
+
+VS
+{
+	#include "common/vertex.hlsl"
+	//
+	// Main
+	//
+	PixelInput MainVs( INSTANCED_SHADER_PARAMS( VS_INPUT i ) )
+	{
+		PixelInput o = ProcessVertex( i );
+        //pass the VertexColor to the pixel shader
+		o.vVertexColor.rgb = i.vColor.rgb;
+		o.vVertexColor.a =  i.vColor.a;
+
+		return FinalizeVertex( o );
+	}
+}
+
+//=========================================================================================================================
+
+PS
+{  
+    //Include our Custom Pixel Includes. which are basically the same as the Normal one but with less useless stuff to make it compile faster.
+    #include "TextureAtlas/pixel.hlsl"
+
+	PixelOutput MainPs( PixelInput i )
+	{
+        float2 Dimensions = TextureDimensions2D( g_tColor, 0 ) -1;
+        
+        i.vTextureCoords.x = ( clamp(frac(i.vTextureCoords.x), 0.01, 0.99) + i.vVertexColor.x ) * GridSize / Dimensions.x;
+        i.vTextureCoords.y = ( clamp(frac(i.vTextureCoords.y), 0.01, 0.99) + i.vVertexColor.y ) * GridSize / Dimensions.y;
+
+        float2 uv_ddx = ddx(i.vTextureCoords);
+        float2 uv_ddy = ddy(i.vTextureCoords);
+
+        /*
+        Material m = ToMaterial(
+            Tex2DGrad( g_tColor, i.vTextureCoords, uv_ddx, uv_ddy), 
+            Tex2DGrad( g_tNormal, i.vTextureCoords, uv_ddx, uv_ddy), 
+            Tex2DGrad( g_tRma, i.vTextureCoords, uv_ddx, uv_ddy),
+            g_flTintColor
+        );
+        */
+
+        Material m = ToMaterial(
+            Tex2DLevel( g_tColor, i.vTextureCoords, 0.0), 
+            Tex2DLevel( g_tNormal, i.vTextureCoords, 0.0), 
+            Tex2DLevel( g_tRma, i.vTextureCoords, 0.0),
+            g_flTintColor
+        );
+
+		return FinalizePixelMaterial( i, m );
+	}
+}
