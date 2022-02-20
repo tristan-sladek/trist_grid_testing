@@ -315,7 +315,7 @@ public class MeshBuilder
 				c += off;
 				d += off;
 
-				verts = GetQuad( a, b, c, d, 2, (x2 - x1) / GS, 1, (x1 + HGS) / GS );//, (x2 - x1) / GS, 1, (x1 / GS - x) );
+				verts = GetQuad( a, b, c, d, tI, (x2 - x1) / GS, 1, (x1 + HGS) / GS );//, (x2 - x1) / GS, 1, (x1 / GS - x) );
 				foreach ( var v in verts )
 					wVerts.Add( v );
 			}
@@ -338,7 +338,7 @@ public class MeshBuilder
 				c += off;
 				d += off;
 
-				verts = GetQuad( a, b, c, d, 2, (x2 - x1) / GS, SS, (x1 + HGS) / GS );
+				verts = GetQuad( a, b, c, d, tI, (x2 - x1) / GS, SS, (x1 + HGS) / GS );
 
 
 				foreach ( var v in verts )
@@ -360,7 +360,7 @@ public class MeshBuilder
 				c += off;
 				d += off;
 
-				verts = GetQuad( a, b, c, d, 2 );
+				verts = GetQuad( a, b, c, d, tI );
 				foreach ( var v in verts )
 					wVerts.Add( v );
 			}
@@ -379,7 +379,7 @@ public class MeshBuilder
 				c += off;
 				d += off;
 
-				verts = GetQuad( a, b, c, d, 2, SS, 1, 1 - SS );
+				verts = GetQuad( a, b, c, d, tI, SS, 1, 1 - SS );
 				foreach ( var v in verts )
 					wVerts.Add( v );
 			}
@@ -397,7 +397,7 @@ public class MeshBuilder
 				c += off;
 				d += off;
 
-				verts = GetQuad( a, b, c, d, 2, SS );
+				verts = GetQuad( a, b, c, d, tI, SS );
 				foreach ( var v in verts )
 					wVerts.Add( v );
 			}

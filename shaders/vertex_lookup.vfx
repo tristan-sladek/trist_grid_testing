@@ -83,8 +83,10 @@ PS
 	{
         float2 Dimensions = TextureDimensions2D( g_tColor, 0 );
         
-        i.vTextureCoords.x = ( clamp(frac(i.vTextureCoords.x), 0.01, 0.99) + ( i.vData % GridSize ) ) * GridSize / Dimensions.x;
-        i.vTextureCoords.y = ( clamp(frac(i.vTextureCoords.y), 0.01, 0.99) + floor( i.vData / GridSize ) ) * GridSize / Dimensions.y;
+        // (Dim / GridSize) is the count of tiles, (GridSize / Dim) is the scale of each tile from 0 - 1
+
+        i.vTextureCoords.x = ( clamp(frac(i.vTextureCoords.x), 0.01, 0.99) + ( i.vData % (Dimensions.x / GridSize) ) ) * GridSize / Dimensions.x;
+        i.vTextureCoords.y = ( clamp(frac(i.vTextureCoords.y), 0.01, 0.99) + floor( i.vData / (Dimensions.y / GridSize) ) ) * GridSize / Dimensions.y;
 
         Material m = ToMaterial(
             Tex2DLevel( g_tColor, i.vTextureCoords, 0.0), 
