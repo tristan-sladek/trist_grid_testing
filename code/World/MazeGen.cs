@@ -75,6 +75,9 @@ public class MazeGen
 				ushort E = ((c.Walls[2] == true) ? (ushort)0b0010 : (ushort)0b0000);
 				ushort W = ((c.Walls[3] == true) ? (ushort)0b0001 : (ushort)0b0000);
 				t.Walls = (ushort)(N | S | E | W);
+				t.WallTI = 17;
+				t.FloorTI = 1;
+				t.FloorWallTI = 16;
 				tiles.Add( t );
 			}
 
