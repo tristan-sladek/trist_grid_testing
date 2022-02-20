@@ -20,6 +20,7 @@ public partial class Pawn : ModelEntity
 		if ( IsServer && Input.Pressed( InputButton.Jump ) )
 		{
 			CurrentGame.CurrentGridWorld.QueueTileChunk( CurrentGame.CurrentGridWorld.GetTileChunk( 0, 0 ) );
+			CurrentGame.CurrentGridWorld.QueueTileChunk( CurrentGame.CurrentGridWorld.GetTileChunk( 1, 1 ) );
 		}
 		if ( IsServer && Input.Pressed( InputButton.Attack1 ) )
 		{
