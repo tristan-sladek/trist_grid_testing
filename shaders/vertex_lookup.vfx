@@ -42,7 +42,7 @@ struct VertexInput
 {
 	#include "common/vertexinput.hlsl"
     //Convert this to a float2 once you get your own Pixel going.
-	float4 vColor : COLOR0 < Semantic( Color ); >;
+	uint vData : TEXCOORD10 < Semantic( None ); >;
 };
 
 //=========================================================================================================================
@@ -50,6 +50,7 @@ struct VertexInput
 struct PixelInput
 {
 	#include "common/pixelinput.hlsl"
+    uint vData : TEXCOORD10 < Semantic( None ); >;
 };
 
 //=========================================================================================================================
@@ -63,10 +64,10 @@ VS
 	PixelInput MainVs( INSTANCED_SHADER_PARAMS( VS_INPUT i ) )
 	{
 		PixelInput o = ProcessVertex( i );
+        o.vData = i.vData;
         //pass the VertexColor to the pixel shader
-		o.vVertexColor.rgb = i.vColor.rgb;
-		o.vVertexColor.a =  i.vColor.a;
-
+        //o.vVertexColor.rgb = i.vColor.rgb;
+        //o.vVertexColor.a =  i.vColor.a;
 		return FinalizeVertex( o );
 	}
 }
@@ -80,22 +81,10 @@ PS
 
 	PixelOutput MainPs( PixelInput i )
 	{
-        float2 Dimensions = TextureDimensions2D( g_tColor, 0 ) -1;
+        float2 Dimensions = TextureDimensions2D( g_tColor, 0 );
         
-        i.vTextureCoords.x = ( clamp(frac(i.vTextureCoords.x), 0.01, 0.99) + i.vVertexColor.x ) * GridSize / Dimensions.x;
-        i.vTextureCoords.y = ( clamp(frac(i.vTextureCoords.y), 0.01, 0.99) + i.vVertexColor.y ) * GridSize / Dimensions.y;
-
-        float2 uv_ddx = ddx(i.vTextureCoords);
-        float2 uv_ddy = ddy(i.vTextureCoords);
-
-        /*
-        Material m = ToMaterial(
-            Tex2DGrad( g_tColor, i.vTextureCoords, uv_ddx, uv_ddy), 
-            Tex2DGrad( g_tNormal, i.vTextureCoords, uv_ddx, uv_ddy), 
-            Tex2DGrad( g_tRma, i.vTextureCoords, uv_ddx, uv_ddy),
-            g_flTintColor
-        );
-        */
+        i.vTextureCoords.x = ( clamp(frac(i.vTextureCoords.x), 0.01, 0.99) + ( i.vData % GridSize ) ) * GridSize / Dimensions.x;
+        i.vTextureCoords.y = ( clamp(frac(i.vTextureCoords.y), 0.01, 0.99) + floor( i.vData / GridSize ) ) * GridSize / Dimensions.y;
 
         Material m = ToMaterial(
             Tex2DLevel( g_tColor, i.vTextureCoords, 0.0), 
@@ -104,6 +93,8 @@ PS
             g_flTintColor
         );
 
-		return FinalizePixelMaterial( i, m );
+        PixelOutput o = FinalizePixelMaterial( i, m );
+        
+        return o;
 	}
 }

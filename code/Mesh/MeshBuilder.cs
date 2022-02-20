@@ -5,23 +5,17 @@ public class MeshBuilder
 {
 	float MAX = float.MinValue;
 	float MIN = float.MaxValue;
-	private Vertex[] GetQuad( Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4, float w = 1, float h = 1, float ox = 0, float oy = 0 )
+	private TristVertex[] GetQuad( Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4, uint ti = 1, float w = 1, float h = 1, float ox = 0, float oy = 0 )
 	{
 		Vector3 N = (v1 - v2).Cross( v1 - v3 ) * -1;
 		Vector3 T = (v2 - v1).Normal * -1;
 		
-		Vertex a = new Vertex( v1, N, T, new Vector2( 0 + ox, h + oy ) );		
-		Vertex b = new Vertex( v2, N, T, new Vector2( 0 + ox, 0 + oy ) );		
-		Vertex c = new Vertex( v3, N, T, new Vector2( w + ox, h + oy ) );		
-		Vertex d = new Vertex( v4, N, T, new Vector2( w + ox, 0 - oy ) );
-
-		var col = Color.FromBytes(0,0,0);
-		a.Color = col;
-		b.Color = col;
-		c.Color = col;
-		d.Color = col;
-
-		return new Vertex[]{ a, c, b, d, b, c };
+		TristVertex a = new TristVertex( v1, N, T, new Vector2( 0 + ox, h + oy ), ti );		
+		TristVertex b = new TristVertex( v2, N, T, new Vector2( 0 + ox, 0 + oy ), ti );		
+		TristVertex c = new TristVertex( v3, N, T, new Vector2( w + ox, h + oy ), ti );		
+		TristVertex d = new TristVertex( v4, N, T, new Vector2( w + ox, 0 - oy ), ti );
+		
+		return new TristVertex[]{ a, c, b, d, b, c };
 	}
 	private void CheckMinMax(params float[] v)
 	{
@@ -31,9 +25,9 @@ public class MeshBuilder
 			if ( val > MAX ) MAX = val;
 		}		
 	}
-	private List<Vertex> FloorPass()
+	private List<TristVertex> FloorPass()
 	{
-		List<Vertex> fVerts = new();
+		List<TristVertex> fVerts = new();
 		for ( int x = 0; x < GridWorld.CHUNK_SIZE; x++ )
 			for ( int y = 0; y < GridWorld.CHUNK_SIZE; y++ )
 			{
@@ -46,9 +40,9 @@ public class MeshBuilder
 				
 		return fVerts;
 	}
-	private List<Vertex> HorizontalPass()
+	private List<TristVertex> HorizontalPass()
 	{
-		List<Vertex> hVerts = new();
+		List<TristVertex> hVerts = new();
 		for ( int y = 0; y < GridWorld.CHUNK_SIZE; y++)
 			for (int x = 0;x < GridWorld.CHUNK_SIZE; x++ )
 			{
@@ -80,7 +74,7 @@ public class MeshBuilder
 					new Vector3( x1, y1, z1 ),
 					new Vector3( x1, y1, z2 ),
 					new Vector3( x1, y2, z1 ),
-					new Vector3( x1, y2, z2 ),
+					new Vector3( x1, y2, z2 ), 1,
 					1,
 					Math.Abs( TA.Height - TB.Height )
 				);
@@ -89,9 +83,9 @@ public class MeshBuilder
 			}		
 		return hVerts;
 	}
-	private List<Vertex> VerticalPass()
+	private List<TristVertex> VerticalPass()
 	{
-		List<Vertex> vVerts = new();
+		List<TristVertex> vVerts = new();
 		for ( int y = 0; y < GridWorld.CHUNK_SIZE; y++ )
 			for ( int x = 0; x < GridWorld.CHUNK_SIZE; x++ )
 			{
@@ -123,7 +117,7 @@ public class MeshBuilder
 					new Vector3( x1, y1, z1 ),
 					new Vector3( x1, y1, z2 ),
 					new Vector3( x2, y1, z1 ),
-					new Vector3( x2, y1, z2 ),
+					new Vector3( x2, y1, z2 ), 1,
 					1,
 					Math.Abs( TA.Height - TB.Height )
 				);
@@ -140,17 +134,17 @@ public class MeshBuilder
 			vec.z
 			);
 	}
-	private List<Vertex> WallSeg(int x, int y, float h, bool N, bool E, bool W, bool NW, bool EW, bool WW, float R)
+	private List<TristVertex> WallSeg(int x, int y, float h, bool N, bool E, bool W, bool NW, bool EW, bool WW, float R)
 	{
 		float GS = GridWorld.GRID_SCALE;
 		float HGS = GS / 2;
-		List<Vertex> wVerts = new();
+		List<TristVertex> wVerts = new();
 
 		float z1 = h * GS;
 		float z2 = (h + 1) * GS;		
 		float SL = 0.375f; //Scale Large (how many units off the wall?)
 		float SS = 0.5f - SL; //Scale Small (inverse of this)
-		Vertex[] verts;
+		TristVertex[] verts;
 
 		var off = new Vector3( x * GS + GS / 2, y * GS + GS / 2, 0 );
 
@@ -172,7 +166,7 @@ public class MeshBuilder
 				c += off;
 				d += off;
 
-				verts = GetQuad( a, b, c, d, (x2 - x1) / GS, 1, (x1 + HGS) / GS );//, (x2 - x1) / GS, 1, (x1 / GS - x) );
+				verts = GetQuad( a, b, c, d, 2, (x2 - x1) / GS, 1, (x1 + HGS) / GS );//, (x2 - x1) / GS, 1, (x1 / GS - x) );
 				foreach ( var v in verts )
 					wVerts.Add( v );
 			}			
@@ -193,7 +187,7 @@ public class MeshBuilder
 				c += off;
 				d += off;
 
-				verts = GetQuad( a, b, c, d , (x2 - x1) / GS, SS, (x1 + HGS) / GS );
+				verts = GetQuad( a, b, c, d, 2, (x2 - x1) / GS, SS, (x1 + HGS) / GS );
 				
 				
 				foreach ( var v in verts )
@@ -215,7 +209,7 @@ public class MeshBuilder
 				c += off;
 				d += off;
 
-				verts = GetQuad( a, b, c, d );
+				verts = GetQuad( a, b, c, d, 2 );
 				foreach ( var v in verts )
 					wVerts.Add( v );
 			}
@@ -234,7 +228,7 @@ public class MeshBuilder
 				c += off;
 				d += off;
 
-				verts = GetQuad( a, b, c, d, SS, 1, 1 - SS );
+				verts = GetQuad( a, b, c, d, 2, SS, 1, 1 - SS );
 				foreach ( var v in verts )
 					wVerts.Add( v );
 			}
@@ -252,7 +246,7 @@ public class MeshBuilder
 				c += off;
 				d += off;
 
-				verts = GetQuad( a, b, c, d, SS );
+				verts = GetQuad( a, b, c, d, 2, SS );
 				foreach ( var v in verts )
 					wVerts.Add( v );
 			}
@@ -262,9 +256,9 @@ public class MeshBuilder
 
 		return wVerts;
 	}
-	private List<Vertex> WallPass()
+	private List<TristVertex> WallPass()
 	{
-		List<Vertex> wVerts = new();
+		List<TristVertex> wVerts = new();
 
 		for ( int y = 0; y < GridWorld.CHUNK_SIZE; y++ )
 			for ( int x = 0; x < GridWorld.CHUNK_SIZE; x++ )
@@ -279,7 +273,7 @@ public class MeshBuilder
 				bool EW = getTile( x + 1, y ).WestWall;
 				bool WW = getTile( x - 1, y ).EastWall;
 
-				List<Vertex> verts;
+				List<TristVertex> verts;
 
 				if ( N )
 				{
@@ -346,17 +340,17 @@ public class MeshBuilder
 			.AddMesh( CreateMesh( WallPass(), m5 ) )
 			.Create();
 	}
-	private Mesh CreateMesh( List<Vertex> verts, Material mat)
+	private Mesh CreateMesh( List<TristVertex> verts, Material mat)
 	{
 		Mesh mesh = null;
 		if ( verts.Count > 0 )
 		{
 			mesh = new Mesh( mat ) { Bounds = new BBox( MIN, MAX ) };
-			mesh.CreateVertexBuffer<Vertex>( verts.Count, Vertex.Layout, verts );
+			mesh.CreateVertexBuffer<TristVertex>( verts.Count, TristVertex.Layout, verts );
 		}
 		return mesh;
 	}
-	public Vertex[] Floor( float ix, float iy, float iz, float s )
+	public TristVertex[] Floor( float ix, float iy, float iz, float s )
 	{
 		var x = ix * s;
 		var y = iy * s;
@@ -368,6 +362,7 @@ public class MeshBuilder
 			new Vector3( x, y + s, z ),
 			new Vector3( x + s, y, z ),
 			new Vector3( x + s, y + s, z )
+			, 0
 		);
 		
 		return v;
