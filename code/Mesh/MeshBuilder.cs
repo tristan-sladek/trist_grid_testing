@@ -69,7 +69,7 @@ public class MeshBuilder
 			for ( int y = 0; y < GridWorld.CHUNK_SIZE; y++ )
 			{
 				var t = GetTile(x,y);
-				var verts = Floor( x, y, t.Height, GridWorld.GRID_SCALE );
+				var verts = Floor( x, y, t.Height, GridWorld.GRID_SCALE, t.FloorTI );
 				if ( verts != null && verts.Length > 0 )
 					foreach ( var v in verts )
 						fVerts.Add( v );
@@ -93,26 +93,26 @@ public class MeshBuilder
 				if(TN.Height > T.Height)
 				{
 					// TODO: replace texture index with tile's attribute
-					var verts = FloorWall( x, y, T.Height, (TN.Height - T.Height), 0, 1 );
+					var verts = FloorWall( x, y, T.Height, (TN.Height - T.Height), 0, T.FloorWallTI );
 					foreach ( var v in verts )
 						fVerts.Add( v );
 				}				
 				else if (TN.Height < T.Height)
 				{
-					var verts = FloorWall( x, y + 1, TN.Height, (T.Height - TN.Height), 1, 1 );
+					var verts = FloorWall( x, y + 1, TN.Height, (T.Height - TN.Height), 1, TN.FloorWallTI );
 					foreach ( var v in verts )
 						fVerts.Add( v );
 				}
 				
 				if ( TE.Height > T.Height )
 				{
-					var verts = FloorWall( x, y, T.Height, (TE.Height - T.Height), 1.5f, 1 );
+					var verts = FloorWall( x, y, T.Height, (TE.Height - T.Height), 1.5f, T.FloorWallTI );
 					foreach ( var v in verts )
 						fVerts.Add( v );
 				}
 				else if ( TE.Height < T.Height )
 				{
-					var verts = FloorWall( x + 1, y, TE.Height, (T.Height - TE.Height), 0.5f, 1 );
+					var verts = FloorWall( x + 1, y, TE.Height, (T.Height - TE.Height), 0.5f, TE.FloorWallTI );
 					foreach ( var v in verts )
 						fVerts.Add( v );
 				}
@@ -160,7 +160,7 @@ public class MeshBuilder
 					var cNEW = TNE.WestWall;
 					var cNES = TNE.SouthWall;
 
-					verts = WallSeg( x, y, T.Height, N, E, W, FN, FE, FW, cNWE, cNWS, cNEW, cNES, 0 );
+					verts = WallSeg( x, y, T.Height, N, E, W, FN, FE, FW, cNWE, cNWS, cNEW, cNES, 0, T.WallTI );
 					foreach ( var v in verts )
 						wVerts.Add( v );
 				}				
@@ -175,7 +175,7 @@ public class MeshBuilder
 					var cNEW = TSW.EastWall;
 					var cNES = TSW.NorthWall;
 
-					verts = WallSeg( x, y, T.Height, S, W, E, FN, FW, FE, cNWE, cNWS, cNEW, cNES, 1 );
+					verts = WallSeg( x, y, T.Height, S, W, E, FN, FW, FE, cNWE, cNWS, cNEW, cNES, 1, T.WallTI );
 					foreach ( var v in verts )
 						wVerts.Add( v );
 				}
@@ -190,7 +190,7 @@ public class MeshBuilder
 					var cNEW = TSE.NorthWall;
 					var cNES = TSE.WestWall;
 
-					verts = WallSeg( x, y, T.Height, E, S, N, FN, FE, FW, cNWE, cNWS, cNEW, cNES, 1.5f );
+					verts = WallSeg( x, y, T.Height, E, S, N, FN, FE, FW, cNWE, cNWS, cNEW, cNES, 1.5f, T.WallTI );
 					foreach ( var v in verts )
 						wVerts.Add( v );
 				}
@@ -205,7 +205,7 @@ public class MeshBuilder
 					var cNEW = TNW.SouthWall;
 					var cNES = TNW.EastWall;
 
-					verts = WallSeg( x, y, T.Height, W, N, S, FN, FE, FW, cNWE, cNWS, cNEW, cNES, 0.5f );
+					verts = WallSeg( x, y, T.Height, W, N, S, FN, FE, FW, cNWE, cNWS, cNEW, cNES, 0.5f, T.WallTI );
 					foreach ( var v in verts )
 						wVerts.Add( v );
 				}
@@ -234,24 +234,24 @@ public class MeshBuilder
 		if ( y >= GridWorld.CHUNK_SIZE ) { cy++; y -= GridWorld.CHUNK_SIZE; }
 		return CurrentGridWorld.GetTile( new Vector4( x, y, cx, cy ) );
 	}
-	private TristVertex[] Floor( float ix, float iy, float iz, float s )
+	private TristVertex[] Floor( float iX, float iY, float iZ, float s, uint tI = 0 )
 	{
-		var x = ix * s;
-		var y = iy * s;
-		var z = iz * s;
+		var x = iX * s;
+		var y = iY * s;
+		var z = iZ * s;
 		CheckMinMax( x, y, z );
 
 		var v = GetQuad(
 			new Vector3( x, y, z ),
 			new Vector3( x, y + s, z ),
 			new Vector3( x + s, y, z ),
-			new Vector3( x + s, y + s, z )
-			, 0
+			new Vector3( x + s, y + s, z ),
+			tI
 		);
 		
 		return v;
 	}
-	private TristVertex[] FloorWall ( float x, float y, float z, float h, float r, uint tI = 1)
+	private TristVertex[] FloorWall ( float x, float y, float z, float h, float r, uint tI = 0)
 	{
 		// Provides functionality for building a quad on the south face of a tile,
 		// allows for rotation to support E,W, and S tiles.
@@ -281,7 +281,7 @@ public class MeshBuilder
 
 		return GetQuad( a, b, c, d, tI, 1, h );
 	}
-	private List<TristVertex> WallSeg( int x, int y, float h, bool n, bool e, bool w, bool fN, bool fE, bool fW, bool cNWE, bool cNWS, bool cNEW, bool cNES, float r )
+	private List<TristVertex> WallSeg( int x, int y, float h, bool n, bool e, bool w, bool fN, bool fE, bool fW, bool cNWE, bool cNWS, bool cNEW, bool cNES, float r, uint tI = 0 )
 	{
 		float GS = GridWorld.GRID_SCALE;
 		float HGS = GS / 2;

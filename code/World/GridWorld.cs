@@ -52,7 +52,17 @@ public partial class GridWorld
 
 		for ( int y = 0; y < CHUNK_SIZE; y++ )
 			for ( int x = 0; x < CHUNK_SIZE; x++ )
-				b[x, y] = new();
+			{
+				var t = new Tile();
+				if ( x % 2 == ((y % 2 == 1) ? 1 : 0) )
+					t.FloorTI = 4;				
+
+				t.FloorWallTI = 1;
+				t.WallTI = 2;
+
+				b[x, y] = t;
+				
+			}
 
 				/*
 				for ( int x = 0; x < CHUNK_SIZE; x++ )
