@@ -152,8 +152,8 @@ public class MeshBuilder
 					// These are all from the perspective of the facing wall being the "north" wall
 					// North of Facing has Wall Facing Tile, ect...
 					var FN = TN.SouthWall;
-					var FE = TE.WestWall;
-					var FW = TW.EastWall;
+					var FE = TE.WestWall || TE.NorthWall;
+					var FW = TW.EastWall || TW.NorthWall;
 					// Check if there's a corner NW, ect.
 					var cNWE = TNW.EastWall;
 					var cNWS = TNW.SouthWall;
@@ -167,8 +167,8 @@ public class MeshBuilder
 				if ( S )
 				{
 					var FN = TS.NorthWall;
-					var FE = TE.WestWall;
-					var FW = TW.EastWall;
+					var FE = TE.WestWall || TE.SouthWall;
+					var FW = TW.EastWall || TW.SouthWall;
 
 					var cNWE = TSE.WestWall;
 					var cNWS = TSE.NorthWall;
@@ -182,8 +182,8 @@ public class MeshBuilder
 				if ( E )
 				{
 					var FN = TE.WestWall;
-					var FE = TS.NorthWall;
-					var FW = TN.SouthWall;					
+					var FE = TS.NorthWall || TS.EastWall;
+					var FW = TN.SouthWall || TN.EastWall;
 
 					var cNWE = TNE.SouthWall;
 					var cNWS = TNE.WestWall;
@@ -197,8 +197,8 @@ public class MeshBuilder
 				if ( W )
 				{
 					var FN = TW.EastWall;
-					var FE = TN.SouthWall;
-					var FW = TS.NorthWall;					
+					var FE = TN.SouthWall || TN.WestWall;
+					var FW = TS.NorthWall || TS.WestWall;
 
 					var cNWE = TSW.NorthWall;
 					var cNWS = TSW.EastWall;

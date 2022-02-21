@@ -75,12 +75,23 @@ public partial class GridWorld
 			b[2, 0].Height = 1;
 			b[0, 2].Height = 1.5f;
 
-			b[4, 4].Walls = 0b0111;
-			b[4, 5].Walls = 0b1001;
-			b[5, 5].Walls = 0b1100;
-			b[6, 5].Walls = 0b1010;
-			b[6, 4].Walls = 0b0110;
-			
+			int offx = 4;
+			int offy = 4;
+			int sizex = 9;
+			int sizey = 5;
+
+			for ( int i = 0; i < sizex; i++ ) 
+				for(int j = 0; j < sizey; j++ )
+				{
+					var t = b[i + offx, j + offy];
+					if ( i == 0 ) t.Walls |= 0b0001;
+					if ( i == sizex - 1 ) t.Walls |= 0b0010;
+					if ( j == 0 ) t.Walls |= 0b0100;
+					if ( j == sizey - 1 ) t.Walls |= 0b1000;
+
+					if ( i == sizex / 2 && j == 0 ) t.Walls = 0b0000;
+					t.FloorTI = 2;
+				}					
 		}
 		if( cx == 1 && cy == 1)
 		{
@@ -160,7 +171,6 @@ public partial class GridWorld
 		}
 		return false; // false if it's the same or some other error
 	}
-	
 	
 	List<ChunkEntity> ModelQueue = new();
 	long lastGen = 0;
