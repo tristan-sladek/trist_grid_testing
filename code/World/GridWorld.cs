@@ -97,7 +97,12 @@ public partial class GridWorld
 		{
 			var m = new MazeGen().GenerateMaze( 16 );
 			foreach( Tile t in m)
-				TileChunk.Add( t );
+			{
+				var T = t;
+				t.Height = ((float)Rand.Int( 0, 1 )) / 2f;
+				TileChunk.Add( T );
+			}
+				
 			return TileChunk;
 		}
 				

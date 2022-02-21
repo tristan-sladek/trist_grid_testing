@@ -139,11 +139,19 @@ public class MeshBuilder
 				var TS = GetTile( x, y - 1 );
 				var TE = GetTile( x + 1, y );
 				var TW = GetTile( x - 1, y );
-
 				var TNW = GetTile( x - 1, y + 1 );
 				var TNE = GetTile( x + 1, y + 1 );
 				var TSW = GetTile( x - 1, y - 1 );
 				var TSE = GetTile( x + 1, y - 1 );
+				
+				var NHE = TN.Height == T.Height;
+				var SHE = TS.Height == T.Height;
+				var EHE = TE.Height == T.Height;
+				var WHE = TW.Height == T.Height;
+				var NWHE = TNW.Height == T.Height;
+				var NEHE = TNE.Height == T.Height;
+				var SWHE = TSW.Height == T.Height;
+				var SEHE = TSE.Height == T.Height;
 
 				List<TristVertex> verts;
 
@@ -160,7 +168,13 @@ public class MeshBuilder
 					var cNEW = TNE.WestWall;
 					var cNES = TNE.SouthWall;
 
-					verts = WallSeg( x, y, T.Height, N, E, W, FN, FE, FW, cNWE, cNWS, cNEW, cNES, 0, T.WallTI );
+					//god imagine if I had to write this out for every direction
+					verts = WallSeg( x, y, T.Height,
+						N, E, W,
+						FN, FE, FW,
+						cNWE, cNWS, cNEW, cNES,
+						WHE, NWHE, NHE, NEHE, EHE,
+						0, T.WallTI );
 					foreach ( var v in verts )
 						wVerts.Add( v );
 				}				
@@ -175,7 +189,12 @@ public class MeshBuilder
 					var cNEW = TSW.EastWall;
 					var cNES = TSW.NorthWall;
 
-					verts = WallSeg( x, y, T.Height, S, W, E, FN, FW, FE, cNWE, cNWS, cNEW, cNES, 1, T.WallTI );
+					verts = WallSeg( x, y, T.Height,
+						S, W, E,
+						FN, FW, FE,
+						cNWE, cNWS, cNEW, cNES,
+						EHE, SEHE, SHE, SWHE, WHE,
+						1, T.WallTI );
 					foreach ( var v in verts )
 						wVerts.Add( v );
 				}
@@ -190,7 +209,12 @@ public class MeshBuilder
 					var cNEW = TSE.NorthWall;
 					var cNES = TSE.WestWall;
 
-					verts = WallSeg( x, y, T.Height, E, S, N, FN, FE, FW, cNWE, cNWS, cNEW, cNES, 1.5f, T.WallTI );
+					verts = WallSeg( x, y, T.Height,
+						E, S, N,
+						FN, FE, FW,
+						cNWE, cNWS, cNEW, cNES,
+						NHE, NEHE, EHE, SEHE, SHE,
+						1.5f, T.WallTI );
 					foreach ( var v in verts )
 						wVerts.Add( v );
 				}
@@ -205,7 +229,12 @@ public class MeshBuilder
 					var cNEW = TNW.SouthWall;
 					var cNES = TNW.EastWall;
 
-					verts = WallSeg( x, y, T.Height, W, N, S, FN, FE, FW, cNWE, cNWS, cNEW, cNES, 0.5f, T.WallTI );
+					verts = WallSeg( x, y, T.Height,
+						W, N, S,
+						FN, FE, FW,
+						cNWE, cNWS, cNEW, cNES,
+						SHE, SWHE, WHE, NWHE, NHE,
+						0.5f, T.WallTI );
 					foreach ( var v in verts )
 						wVerts.Add( v );
 				}
@@ -281,7 +310,12 @@ public class MeshBuilder
 
 		return GetQuad( a, b, c, d, tI, 1, h );
 	}
-	private List<TristVertex> WallSeg( int x, int y, float h, bool n, bool e, bool w, bool fN, bool fE, bool fW, bool cNWE, bool cNWS, bool cNEW, bool cNES, float r, uint tI = 0 )
+	private List<TristVertex> WallSeg( int x, int y, float h,
+		bool n, bool e, bool w,
+		bool fN, bool fE, bool fW,
+		bool cNWE, bool cNWS, bool cNEW, bool cNES,
+		bool heW, bool heNW, bool heN, bool heNE, bool heE,
+		float r, uint tI = 0 )
 	{
 		float GS = GridWorld.GRID_SCALE;
 		float HGS = GS / 2;
@@ -304,8 +338,8 @@ public class MeshBuilder
 				float y1 = GS * SL;
 				if ( e ) x2 -= GS * SS;
 				if ( w ) x1 += GS * SS;
-				if ( !fW & !w & (cNWE & !cNWS) ) x1 -= GS * SS;
-				if ( !fE & !e & (cNEW & !cNES) ) x2 += GS * SS;
+				if ( !fW & !w & (cNWE & !cNWS) & heNW ) x1 -= GS * SS;
+				if ( !fE & !e & (cNEW & !cNES) & heNE ) x2 += GS * SS;
 				var a = Rotate( new Vector3( x1, y1, z1 ), r );
 				var b = Rotate( new Vector3( x1, y1, z2 ), r );
 				var c = Rotate( new Vector3( x2, y1, z1 ), r );
@@ -328,7 +362,7 @@ public class MeshBuilder
 				float y2 = HGS;
 				if ( w ) x1 += GS * SS;
 				//if ( !fW & !w & (cNWE & !cNWS) ) x1 -= GS * SS;
-				if ( !fE & !e & (cNEW & !cNES) ) x2 += GS * SS;
+				if ( !fE & !e & (cNEW & !cNES) & heNE ) x2 += GS * SS;
 				var a = Rotate( new Vector3( x1, y1, z2 ), r );
 				var b = Rotate( new Vector3( x1, y2, z2 ), r );
 				var c = Rotate( new Vector3( x2, y1, z2 ), r );
@@ -346,7 +380,7 @@ public class MeshBuilder
 			}
 
 			// BACK
-			if ( !fN )
+			if ( !fN || !heN )
 			{
 				float x1 = HGS;
 				float x2 = -HGS;
@@ -365,7 +399,7 @@ public class MeshBuilder
 					wVerts.Add( v );
 			}
 
-			if ( !fE & !e & !cNES & !cNEW ) // East Cap
+			if ( !(fE & heE) & !e & !(cNEW & !cNES & heNE) ) // East Cap
 			{
 				float x1 = HGS;
 				float y1 = HGS - SS * GS;
@@ -383,7 +417,7 @@ public class MeshBuilder
 				foreach ( var v in verts )
 					wVerts.Add( v );
 			}
-			if ( !fW & !w & !cNWE & !cNWS ) // West Cap
+			if ( !(fW & heW) & !w & !(cNWE & !cNWS & heNW) ) // West Cap
 			{
 				float x1 = -HGS;
 				float y1 = HGS;
