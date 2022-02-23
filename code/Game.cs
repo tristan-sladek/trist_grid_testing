@@ -22,8 +22,9 @@ public partial class Game : Sandbox.Game
 	{
 		var pawn = new Pawn();
 		pawn.CurrentGame = this;
-		cl.Pawn = pawn;		
-		cl.Camera = HoverCamera;
+		cl.Pawn = pawn;
+		cl.Components.Add( HoverCamera );
+		//cl.Camera = HoverCamera;
 		
 		base.ClientJoined( cl );
 	}

@@ -3,8 +3,22 @@ using System;
 
 public partial class Tile : BaseNetworkable
 {
-	[Net] private short _height { get; set; } = 0;
-	[Net] public float Height { get { return (float)(_height) / 2f; } set { _height = (short)(value * 2); } }
+	[Net] public short HeightNW { get; set; } = 0;
+	[Net] public short HeightNE { get; set; } = 0;
+	[Net] public short HeightSE { get; set; } = 0;
+	[Net] public short HeightSW { get; set; } = 0;
+	public float Height
+	{ 
+		get { 
+			return (HeightNW + HeightNE + HeightSE + HeightSW) / 8f; 
+		} 
+		set {
+			HeightNW = (short)(value * 2);
+			HeightNE = HeightNW;
+			HeightSE = HeightNW;
+			HeightSW = HeightNW;
+		}
+	}
 	public ushort Walls { get; set; } //NSEW 0b1111
 	public uint WallTI { get; set; }
 	public uint FloorTI { get; set; }

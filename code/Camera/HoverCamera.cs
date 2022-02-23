@@ -1,5 +1,5 @@
 ﻿using Sandbox;
-public class HoverCamera : Camera
+public class HoverCamera : CameraMode
 {
 	Angles LookInput;
 	Vector3 MoveInput;
