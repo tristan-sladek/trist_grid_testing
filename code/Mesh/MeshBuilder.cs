@@ -61,18 +61,40 @@ public class MeshBuilder
 		
 		return new TristVertex[]{ a, c, b, d, b, c };
 	}
+	private TristVertex[] GetQuadMultiHeight( Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4, uint ti = 1, float w = 1, float h1 = 1, float h2 = 1, float ox = 0, float oy = 0 )
+	{
+		Vector3 N = (v1 - v2).Cross( v1 - v3 ) * -1;
+		Vector3 T = (v2 - v1).Normal * -1;
+
+		var maxH = Math.Max( h1, h2 );
+
+		TristVertex a = new TristVertex( v1, N, T, new Vector2( 0 + ox, maxH + oy ), ti );
+		TristVertex b = new TristVertex( v2, N, T, new Vector2( 0 + ox, maxH - h1 + oy ), ti );
+		TristVertex c = new TristVertex( v3, N, T, new Vector2( w + ox, maxH + oy ), ti );
+		TristVertex d = new TristVertex( v4, N, T, new Vector2( w + ox, maxH - h2 - oy ), ti );
+
+		return new TristVertex[] { a, c, b, d, b, c };
+	}
 	// This loops over all tiles to generate the floor quads based upon their height.
 	private List<TristVertex> FloorPass()
 	{
 		List<TristVertex> fVerts = new();
+		var s = GridWorld.GRID_SCALE;
 		for ( int x = 0; x < GridWorld.CHUNK_SIZE; x++ )
 			for ( int y = 0; y < GridWorld.CHUNK_SIZE; y++ )
 			{
-				var t = GetTile(x,y);
-				var verts = Floor( x, y, t.Height, GridWorld.GRID_SCALE, t.FloorTI );
-				if ( verts != null && verts.Length > 0 )
-					foreach ( var v in verts )
-						fVerts.Add( v );
+				var t = GetTile(x,y);				
+				var ox = x * s;
+				var oy = y * s;
+				var verts = GetQuad(
+					new Vector3( ox, oy, t.HeightSW * s ),
+					new Vector3( ox, oy + s, t.HeightNW * s ),
+					new Vector3( ox + s, oy, t.HeightSE * s),
+					new Vector3( ox + s, oy + s, t.HeightNE * s ),
+					t.FloorTI
+				);				
+				foreach ( var v in verts )
+					fVerts.Add( v );
 			}
 				
 		return fVerts;
@@ -92,27 +114,26 @@ public class MeshBuilder
 				// Can't use implicit else because quad drawn on TN.Height == T.Height
 				if(TN.Height > T.Height)
 				{
-					// TODO: replace texture index with tile's attribute
-					var verts = FloorWall( x, y, T.Height, (TN.Height - T.Height), 0, T.FloorWallTI );
+					var verts = FloorWall( x, y, T.Height, (TN.HeightSW - T.HeightNW), (TN.HeightSE - T.HeightNE), 0, T.FloorWallTI );
 					foreach ( var v in verts )
 						fVerts.Add( v );
 				}				
 				else if (TN.Height < T.Height)
 				{
-					var verts = FloorWall( x, y + 1, TN.Height, (T.Height - TN.Height), 1, TN.FloorWallTI );
+					var verts = FloorWall( x, y + 1, TN.Height, (T.HeightNE - TN.HeightSE), (T.HeightNW - TN.HeightSW), 1, TN.FloorWallTI );
 					foreach ( var v in verts )
 						fVerts.Add( v );
 				}
 				
 				if ( TE.Height > T.Height )
 				{
-					var verts = FloorWall( x, y, T.Height, (TE.Height - T.Height), 1.5f, T.FloorWallTI );
+					var verts = FloorWall( x, y, T.Height, (TE.HeightNW - T.HeightNE), (TE.HeightSW - T.HeightSE), 1.5f, T.FloorWallTI );
 					foreach ( var v in verts )
 						fVerts.Add( v );
 				}
 				else if ( TE.Height < T.Height )
 				{
-					var verts = FloorWall( x + 1, y, TE.Height, (T.Height - TE.Height), 0.5f, TE.FloorWallTI );
+					var verts = FloorWall( x + 1, y, TE.Height, (T.HeightSE - TE.HeightSW), (T.HeightNE - TE.HeightNW), 0.5f, TE.FloorWallTI );
 					foreach ( var v in verts )
 						fVerts.Add( v );
 				}
@@ -262,25 +283,8 @@ public class MeshBuilder
 		if ( x >= GridWorld.CHUNK_SIZE ) { cx++; x -= GridWorld.CHUNK_SIZE; }
 		if ( y >= GridWorld.CHUNK_SIZE ) { cy++; y -= GridWorld.CHUNK_SIZE; }
 		return CurrentGridWorld.GetTile( new Vector4( x, y, cx, cy ) );
-	}
-	private TristVertex[] Floor( float iX, float iY, float iZ, float s, uint tI = 0 )
-	{
-		var x = iX * s;
-		var y = iY * s;
-		var z = iZ * s;
-		CheckMinMax( x, y, z );
-
-		var v = GetQuad(
-			new Vector3( x, y, z ),
-			new Vector3( x, y + s, z ),
-			new Vector3( x + s, y, z ),
-			new Vector3( x + s, y + s, z ),
-			tI
-		);
-		
-		return v;
-	}
-	private TristVertex[] FloorWall ( float x, float y, float z, float h, float r, uint tI = 0)
+	}	
+	private TristVertex[] FloorWall ( float x, float y, float z, float hL, float hR, float r, uint tI = 0)
 	{
 		// Provides functionality for building a quad on the south face of a tile,
 		// allows for rotation to support E,W, and S tiles.
@@ -290,17 +294,16 @@ public class MeshBuilder
 
 		var x1 = -HGS;
 		var x2 = HGS;
-		var y1 = HGS;
-		var z2 = h * GS;
+		var y1 = HGS;		
 
 		// offset to move tile by when it is calculated
 		var off = new Vector3( x * GS + HGS, y * GS + HGS, z * GS );
 
 		// Vectors calculated from the perspective of 0,0 being the tile to rotate from
 		var a = Rotate( new Vector3( x1, y1, 0 ), r);
-		var b = Rotate( new Vector3( x1, y1, z2  ), r);
+		var b = Rotate( new Vector3( x1, y1, hL * GS + 0.00001f ), r);
 		var c = Rotate( new Vector3( x2, y1, 0 ), r);
-		var d = Rotate( new Vector3( x2, y1, z2 ), r);
+		var d = Rotate( new Vector3( x2, y1, hR * GS + 0.00001f ), r);
 		
 		// Local tile moved to sit at proper offset;
 		a += off;
@@ -308,7 +311,9 @@ public class MeshBuilder
 		c += off;
 		d += off;
 
-		return GetQuad( a, b, c, d, tI, 1, h );
+		var maxH = Math.Max( hL, hR );
+
+		return GetQuadMultiHeight( a, b, c, d, tI, 1, hL, hR );
 	}
 	private List<TristVertex> WallSeg( int x, int y, float h,
 		bool n, bool e, bool w,

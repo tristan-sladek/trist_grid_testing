@@ -91,7 +91,16 @@ public partial class GridWorld
 
 					if ( i == sizex / 2 && j == 0 ) t.Walls = 0b0000;
 					t.FloorTI = 2;
-				}					
+				}
+
+			for(int i =0; i< 4; i++ )
+			{
+				b[1, 4 + i].HeightSW = 0 + i*0.5f;
+				b[1, 4 + i].HeightSE = 0 + i*0.5f;
+				b[1, 4 + i].HeightNW = 0.5f + i*0.5f;
+				b[1, 4 + i].HeightNE = 0.5f + i*0.5f;
+
+			}
 		}
 		if( cx == 1 && cy == 1)
 		{
