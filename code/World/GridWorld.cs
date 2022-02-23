@@ -99,8 +99,15 @@ public partial class GridWorld
 				b[1, 4 + i].HeightSE = 0 + i*0.5f;
 				b[1, 4 + i].HeightNW = 0.5f + i*0.5f;
 				b[1, 4 + i].HeightNE = 0.5f + i*0.5f;
-
 			}
+
+			b[2, 8].HeightNE = 1;
+			b[3, 8].HeightSW = 1;
+
+			b[2, 10].HeightNE = 0.5f;
+			b[3, 11].Height = 0.5f;
+			b[2, 11].HeightNE = 0.5f;
+			b[2, 11].HeightSE = 0.5f;
 		}
 		if( cx == 1 && cy == 1)
 		{
@@ -108,7 +115,7 @@ public partial class GridWorld
 			foreach( Tile t in m)
 			{
 				var T = t;
-				t.Height = ((float)Rand.Int( 0, 1 )) / 2f;
+				//t.Height = ((float)Rand.Int( 0, 1 )) / 2f;
 				TileChunk.Add( T );
 			}
 				
